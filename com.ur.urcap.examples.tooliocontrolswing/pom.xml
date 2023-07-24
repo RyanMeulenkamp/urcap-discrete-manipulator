@@ -6,9 +6,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.ur.urcap.examples</groupId>
-	<artifactId>tooliocontrolswing</artifactId>
+	<artifactId>discretemanipulator</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>Tool I/O Control Swing</name>
+	<name>Discrete Manipulator</name>
 	<packaging>bundle</packaging>
 
 	<properties>
@@ -18,12 +18,12 @@
 		<!--         that comes along with your URCap                           -->
 		<!--********************************************************************-->
 		<!--******************* BEGINNING OF URCAP META DATA *******************-->
-		<urcap.symbolicname>com.ur.urcap.examples.tooliocontrolswing</urcap.symbolicname>
-		<urcap.vendor>Universal Robots</urcap.vendor>
-		<urcap.contactAddress>Energivej 25, 5260 Odense S, Denmark</urcap.contactAddress>
-		<urcap.copyright>Copyright (C) 2009-${copyright.year} Universal Robots. All Rights Reserved</urcap.copyright>
-		<urcap.description>Tool I/O interface control sample URCap</urcap.description>
-		<urcap.licenseType>Sample license</urcap.licenseType>
+		<urcap.symbolicname>com.ur.urcap.examples.discretemanipulator</urcap.symbolicname>
+		<urcap.vendor>Meulenkamp</urcap.vendor>
+		<urcap.contactAddress>Esse 8, st. Isidorushoeve</urcap.contactAddress>
+		<urcap.copyright>Copyright (C) 2023-${copyright.year} Meulenkamp. All Rights Reserved</urcap.copyright>
+		<urcap.description>Simple interface to move manipulator to next discrete position using two sensors and two VFD speeds</urcap.description>
+		<urcap.licenseType>Apache</urcap.licenseType>
 		<urcap.compatibility.CB3>true</urcap.compatibility.CB3>
 		<urcap.compatibility.eSeries>true</urcap.compatibility.eSeries>
 		<!--********************** END OF URCAP META DATA **********************-->
@@ -54,8 +54,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>8</source>
+					<target>8</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -103,7 +103,7 @@
 					<instructions>
 						<!--********** DO NOT MODIFY THE ENTRIES OF THIS SECTION **********-->
 						<Bundle-Category>URCap</Bundle-Category>
-						<Bundle-Activator>com.ur.urcap.examples.tooliocontrol.Activator</Bundle-Activator>
+						<Bundle-Activator>com.meulenkamp.discretemanipulator.Activator</Bundle-Activator>
 						<Bundle-Vendor>${urcap.vendor}</Bundle-Vendor>
 						<Bundle-ContactAddress>${urcap.contactAddress}</Bundle-ContactAddress>
 						<Bundle-Copyright>${urcap.copyright}</Bundle-Copyright>
