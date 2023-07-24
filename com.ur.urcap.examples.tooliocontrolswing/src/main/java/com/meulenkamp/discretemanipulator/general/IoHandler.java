@@ -1,9 +1,8 @@
 package com.meulenkamp.discretemanipulator.general;
 
 import com.ur.urcap.api.domain.io.DigitalIO;
+import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.io.IOModel;
-
-import java.util.Collection;
 
 public class IoHandler {
 
@@ -37,17 +36,10 @@ public class IoHandler {
      *  ...
      *  config_out[7]
      */
-    public DigitalIO getDigitalIO(final String defaultName){
-        final Collection<DigitalIO> IOcollection = ioModel.getIOs(DigitalIO.class);
-        int IO_count = IOcollection.size();
-        if(IO_count > 0){
-            for (final DigitalIO thisIO : IOcollection) {
-                final String thisDefaultName = thisIO.getDefaultName();
-                if (thisDefaultName.equals(defaultName)) {
-                    return thisIO;
-                }
-            }
-        }
-        return null;
+    public DigitalIO getDigitalIO(final String defaultName) {
+        return (DigitalIO) ioModel.getIOs().stream()
+                .filter(element -> element.getType() == IO.IOType.DIGITAL && element.getDefaultName().equals(defaultName))
+                .findFirst()
+                .orElse(null);
     }
 }
