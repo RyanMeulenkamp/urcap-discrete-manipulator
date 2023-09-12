@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class ProgramView
         extends StyledView
@@ -45,21 +46,35 @@ public class ProgramView
         panel.add(createDirectionPanel(provider));
     }
 
+    private ImageIcon scaledIcon(final String name, final int size) {
+        return new ImageIcon(new ImageIcon(Objects.requireNonNull(
+                getClass().getResource("/icons/" + name + ".png"
+        ))).getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
+    }
+
+    private JButton iconButton(final String name, final int size) {
+        return new JButton(scaledIcon(name, size));
+    }
+
+    private JLabel iconLabel(final String name, final int size) {
+        return new JLabel(scaledIcon(name, size));
+    }
+
     private Component createSensorPanel() {
         final Box sensorStateBox = Box.createHorizontalBox();
         final JCheckBox leftSensorState = new JCheckBox("", false);
         final JCheckBox rightSensorState = new JCheckBox("", false);
-        final JLabel arrows = new JLabel("⏴ ⏵");
 
         leftSensorState.setEnabled(false);
         rightSensorState.setEnabled(false);
-        arrows.setFont(arrows.getFont().deriveFont(30.0f));
 
         sensorStateBox.add(new JLabel("Sensors:"));
         sensorStateBox.add(style.createHorizontalSpacing());
         sensorStateBox.add(leftSensorState);
         sensorStateBox.add(style.createHorizontalSpacing());
-        sensorStateBox.add(arrows);
+        sensorStateBox.add(iconLabel("proximity-sensor", 48));
+        sensorStateBox.add(new JLabel("  "));
+        sensorStateBox.add(iconLabel("proximity-sensor", 48));
         sensorStateBox.add(style.createHorizontalSpacing());
         sensorStateBox.add(rightSensorState);
 
@@ -71,13 +86,13 @@ public class ProgramView
     ) {
         final Box jogButtons = Box.createHorizontalBox();
 
-        final JButton previous = new JButton("⏮");
-        final JButton reverseFast = new JButton("⏪");
-        final JButton reverseSlow = new JButton("⏴");
-        final JButton stop = new JButton("⏹");
-        final JButton forwardSlow = new JButton("⏵");
-        final JButton forwardFast = new JButton("⏩");
-        final JButton next = new JButton("⏭");
+        final JButton previous = iconButton("previous", 24);
+        final JButton reverseFast = iconButton("fast-reverse", 24);
+        final JButton reverseSlow = iconButton("reverse", 24);
+        final JButton stop = iconButton("stop", 24);
+        final JButton forwardSlow = iconButton("forward", 24);
+        final JButton forwardFast = iconButton("fast-forward", 24);
+        final JButton next = iconButton("next", 24);
 
         previous.addChangeListener(event -> {
             if (previous.getModel().isPressed()) {
@@ -183,18 +198,11 @@ public class ProgramView
     ) {
         final Box directionBox = Box.createHorizontalBox();
         final ButtonGroup group = new ButtonGroup();
-        final JLabel counterClockwiseLabel = new JLabel("⟲");
-        final JLabel clockwiseLabel = new JLabel("⟳");
 
         clockwise.setSelected(true);
         clockwise.addChangeListener(
                 event -> provider.get().setDirection(clockwise.isSelected())
         );
-
-        counterClockwiseLabel.setFont(
-                counterClockwiseLabel.getFont().deriveFont(30.0f)
-        );
-        clockwiseLabel.setFont(clockwiseLabel.getFont().deriveFont(30.0f));
 
         group.add(counterClockwise);
         group.add(clockwise);
@@ -205,9 +213,9 @@ public class ProgramView
         directionBox.add(style.createHorizontalSpacing());
         directionBox.add(counterClockwise);
         directionBox.add(style.createHorizontalSpacing());
-        directionBox.add(counterClockwiseLabel);
+        directionBox.add(iconLabel("turn-left", 24));
         directionBox.add(style.createHorizontalSpacing());
-        directionBox.add(clockwiseLabel);
+        directionBox.add(iconLabel("turn-right", 24));
         directionBox.add(style.createHorizontalSpacing());
         directionBox.add(clockwise);
 

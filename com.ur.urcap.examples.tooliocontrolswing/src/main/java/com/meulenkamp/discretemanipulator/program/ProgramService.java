@@ -24,7 +24,7 @@ public class ProgramService
 	public void configureContribution(
 			final ContributionConfiguration configuration
 	) {
-		configuration.setChildrenAllowed(true);
+		configuration.setChildrenAllowed(false);
 	}
 
 	@Override

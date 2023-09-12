@@ -56,13 +56,60 @@ public class InstallationContribution implements InstallationNodeContribution {
         active = false;
     }
 
+    private String functionName(final String io) {
+        if (io.startsWith("config")) {
+            return "configurable_digital";
+        } else if (io.startsWith("digital")) {
+            return "standard_digital";
+        } else {
+            return "tool_digital";
+        }
+    }
+
+    private String inputFunctionName(final String io) {
+        return String.format("get_%s_in", functionName(io));
+    }
+
+    private String outputFunctionName(final String io) {
+        return String.format("set_%s_out", functionName(io));
+    }
+
+    private int getIoNumber(final String name) {
+        return Integer.parseInt(name.replaceAll("\\D+", ""));
+    }
+
     @Override
     public void generateScript(final ScriptWriter writer) {
-        writer.assign(SENSOR_1_INPUT_KEY, "\"" + getSensor1Input() + "\"");
-        writer.assign(SENSOR_2_INPUT_KEY, "\"" + getSensor2Input() + "\"");
-        writer.assign(FAST_OUTPUT_KEY, "\"" + getFastOutput() + "\"");
-        writer.assign(SLOW_OUTPUT_KEY, "\"" + getSlowOutput() + "\"");
-        writer.assign(REVERSE_OUTPUT_KEY, "\"" + getReverseOutput() + "\"");
+        writer.defineFunction("read_sensor1");
+        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getSensor1Input()), getIoNumber(getSensor1Input())));
+        writer.end();
+
+        writer.defineFunction("read_sensor2");
+        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getSensor2Input()), getIoNumber(getSensor1Input())));
+        writer.end();
+
+        writer.defineFunction("fast");
+        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
+        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        writer.end();
+
+        writer.defineFunction("slow");
+        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
+        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        writer.end();
+
+        writer.defineFunction("stop");
+        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
+        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        writer.end();
+
+        writer.defineFunction("forward");
+        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getReverseOutput()), getIoNumber(getReverseOutput())));
+        writer.end();
+
+        writer.defineFunction("reverse");
+        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getReverseOutput()), getIoNumber(getReverseOutput())));
+        writer.end();
     }
 
     public void ioChanged(final String ioKey, final String ioPin) {
