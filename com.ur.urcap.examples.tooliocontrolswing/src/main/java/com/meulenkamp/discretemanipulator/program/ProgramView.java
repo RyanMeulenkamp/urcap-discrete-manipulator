@@ -49,7 +49,7 @@ public class ProgramView
     private ImageIcon scaledIcon(final String name, final int size) {
         return new ImageIcon(new ImageIcon(Objects.requireNonNull(
                 getClass().getResource("/icons/" + name + ".png"
-        ))).getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
+                ))).getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
     }
 
     private JButton iconButton(final String name, final int size) {
@@ -61,23 +61,27 @@ public class ProgramView
     }
 
     private Component createSensorPanel(
-        final ContributionProvider<ProgramContribution> provider
+            final ContributionProvider<ProgramContribution> provider
     ) {
 
         final Box sensorStateBox = Box.createHorizontalBox();
         final JCheckBox leftSensorState = new JCheckBox("", false);
         final JCheckBox rightSensorState = new JCheckBox("", false);
+        leftSensorState.setEnabled(false);
+        rightSensorState.setEnabled(false);
 
         new Thread(() -> {
-          while (true) {
             try {
-                leftSensorState.setSelected(provider.get().getLiveControl().isSensorActive(1));
-                rightSensorState.setSelected(provider.get().getLiveControl().isSensorActive(2));
-                Thread.sleep(50);
+                // wait with updating UI until stuff has started
+                Thread.sleep(1500);
+                while (true) {
+                    leftSensorState.setSelected(provider.get().getLiveControl().isSensorActive(1));
+                    rightSensorState.setSelected(provider.get().getLiveControl().isSensorActive(2));
+                    Thread.sleep(50);
+                }
             } catch (InterruptedException e) {
                 return;
             }
-          }
         }).start();
 
         sensorStateBox.add(new JLabel("Sensors:"));

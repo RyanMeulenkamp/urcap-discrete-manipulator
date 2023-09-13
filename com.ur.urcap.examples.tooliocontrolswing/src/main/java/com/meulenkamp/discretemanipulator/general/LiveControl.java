@@ -106,11 +106,13 @@ public class LiveControl {
         new Thread(() -> {
             isRunning.set(true);
             fastForward();
-            awaitSensorState(1, true);
+//            awaitSensorState(1, true);
             awaitSensorState(1, false);
+            awaitSensorState(1, true);
             slowForward();
-            awaitSensorState(2, true);
+//            awaitSensorState(2, true);
             awaitSensorState(2, false);
+            awaitSensorState(2, true);
             stop();
             isRunning.set(false);
         }).start();
@@ -121,11 +123,13 @@ public class LiveControl {
         new Thread(() -> {
             isRunning.set(true);
             fastReverse();
-            awaitSensorState(2, true);
+//            awaitSensorState(2, true);
             awaitSensorState(2, false);
+            awaitSensorState(2, true);
             slowReverse();
-            awaitSensorState(1, true);
+//            awaitSensorState(1, true);
             awaitSensorState(1, false);
+            awaitSensorState(1, true);
             stop();
             isRunning.set(false);
         }).start();
