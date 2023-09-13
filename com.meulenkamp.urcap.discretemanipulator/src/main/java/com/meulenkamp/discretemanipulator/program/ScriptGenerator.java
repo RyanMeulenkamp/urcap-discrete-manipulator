@@ -38,37 +38,29 @@ public class ScriptGenerator {
 
     public void awaitInputState(final String inputFn, final boolean state) {
         writer.whileCondition(String.format(
-            "%s() == %s", inputFn, state ? "False" : "True"
+            "%s() != %s", inputFn, state ? "True" : "False"
         ));
         writer.end();
     }
 
     public void awaitSensor(final int input) {
         final String inputFn = "read_sensor" + input;
-        // while sensor 1 low
         awaitInputState(inputFn, false);
-        // while sensor 1 high
         awaitInputState(inputFn, true);
     }
 
-    public void move(final boolean forward) {
+    public void move(final boolean forward, final int moves) {
         if (forward) {
             forward();
         } else {
             reverse();
         }
         fast();
-        awaitSensor(forward ? 1 : 2);
+        for (int i = 0; i < moves; i++) {
+            awaitSensor(forward ? 1 : 2);
+        }
         slow();
         awaitSensor(forward ? 2 : 1);
         stop();
-    }
-
-    public void next() {
-        move(true);
-    }
-
-    public void previous() {
-        move(false);
     }
 }

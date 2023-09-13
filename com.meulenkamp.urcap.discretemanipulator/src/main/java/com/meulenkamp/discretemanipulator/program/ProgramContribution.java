@@ -12,13 +12,11 @@ import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputCallback;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputFactory;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardNumberInput;
 
-import java.util.function.Consumer;
-
 public class ProgramContribution
         implements ProgramNodeContribution {
-    public static final boolean CLOCKWISE = true;
+    public static final boolean FORWARD = true;
     private static final String DIRECTION = "direction";
-    private static final boolean DEFAULT_DIRECTION = CLOCKWISE;
+    private static final boolean DEFAULT_DIRECTION = FORWARD;
 
     private static final String MOVES = "moves";
     private static final int DEFAULT_MOVES = 1;
@@ -77,14 +75,7 @@ public class ProgramContribution
 
     @Override
     public void generateScript(final ScriptWriter writer) {
-        final ScriptGenerator scriptGenerator = new ScriptGenerator(
-                writer, model
-        );
-        if (getDirection() == CLOCKWISE) {
-            scriptGenerator.next();
-        } else {
-            scriptGenerator.previous();
-        }
+        new ScriptGenerator(writer, model).move(getDirection(), getMoves());
     }
 
     public boolean getDirection() {
