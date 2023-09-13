@@ -53,12 +53,7 @@ public class LiveControl {
 
     public void awaitSensorState(final int sensor, final boolean state) {
         while (isSensorActive(sensor) != state && isRunning.get()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                // interups are fine, just quit the loop
-                return;
-            }
+            // don't hate me java gods
         };
     }
 
