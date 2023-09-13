@@ -41,9 +41,13 @@ public class ProgramView
         panel.add(createJogButtons(provider));
         panel.add(style.createLargeVerticalSpacing());
         panel.add(new JSeparator());
+        panel.add(style.createVerticalSpacing());
         panel.add(createMovesInput(provider));
         panel.add(style.createVerticalSpacing());
         panel.add(createDirectionPanel(provider));
+        panel.add(style.createLargeVerticalSpacing());
+        panel.add(new JSeparator());
+        panel.add(style.createLargeVerticalSpacing());
     }
 
     private ImageIcon scaledIcon(final String name, final int size) {
