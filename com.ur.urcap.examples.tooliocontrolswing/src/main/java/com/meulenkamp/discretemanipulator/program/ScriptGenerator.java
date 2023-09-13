@@ -38,7 +38,7 @@ public class ScriptGenerator {
 
     public void awaitInputState(final String inputFn, final boolean state) {
         writer.whileCondition(String.format(
-                "%s() == %s", inputFn, state ? "True" : "False"
+            "%s() == %s", inputFn, state ? "False" : "True"
         ));
         writer.end();
     }
