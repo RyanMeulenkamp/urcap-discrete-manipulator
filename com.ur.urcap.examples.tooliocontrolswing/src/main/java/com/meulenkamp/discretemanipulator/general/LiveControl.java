@@ -69,7 +69,7 @@ public class LiveControl {
     }
 
     public void fastForward() {
-        setOutputs(false, false, true);
+        setOutputs(false, true, false);
     }
 
     public void fastReverse() {

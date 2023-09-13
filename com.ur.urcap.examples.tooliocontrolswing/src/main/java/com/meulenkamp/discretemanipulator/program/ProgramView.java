@@ -239,4 +239,3 @@ public class ProgramView
         textField.setText(Integer.toString(moves));
     }
 }
-
