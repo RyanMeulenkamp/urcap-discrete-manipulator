@@ -36,7 +36,7 @@ public class ProgramView
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(errorLabel);
         panel.add(style.createLargeVerticalSpacing());
-        panel.add(createSensorPanel());
+        panel.add(createSensorPanel(provider));
         panel.add(style.createLargeVerticalSpacing());
         panel.add(createJogButtons(provider));
         panel.add(style.createLargeVerticalSpacing());
@@ -60,13 +60,25 @@ public class ProgramView
         return new JLabel(scaledIcon(name, size));
     }
 
-    private Component createSensorPanel() {
+    private Component createSensorPanel(
+        final ContributionProvider<ProgramContribution> provider
+    ) {
+
         final Box sensorStateBox = Box.createHorizontalBox();
         final JCheckBox leftSensorState = new JCheckBox("", false);
         final JCheckBox rightSensorState = new JCheckBox("", false);
 
-        leftSensorState.setEnabled(false);
-        rightSensorState.setEnabled(false);
+        new Thread(() -> {
+          while (true) {
+            try {
+                leftSensorState.setSelected(provider.get().getLiveControl().isSensorActive(1));
+                rightSensorState.setSelected(provider.get().getLiveControl().isSensorActive(2));
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                return;
+            }
+          }
+        }).start();
 
         sensorStateBox.add(new JLabel("Sensors:"));
         sensorStateBox.add(style.createHorizontalSpacing());

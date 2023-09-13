@@ -12,7 +12,6 @@ public class LiveControl {
     private final IoHandler ioHandler;
     private final Supplier<InstallationContribution> installationSupplier;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private volatile Thread thread;
 
     public LiveControl(final IOModel ioModel, final Supplier<InstallationContribution> installationSupplier) {
         this.ioHandler = new IoHandler(ioModel);
@@ -97,13 +96,8 @@ public class LiveControl {
     }
 
     public void cancel() {
-        if (thread != null && isRunning.get()) {
+        if (isRunning.get()) {
             isRunning.set(false);
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 

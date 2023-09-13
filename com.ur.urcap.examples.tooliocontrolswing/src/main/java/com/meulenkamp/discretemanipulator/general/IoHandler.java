@@ -38,6 +38,6 @@ public class IoHandler {
      */
     public DigitalIO getDigitalIO(final String defaultName) {
         return (DigitalIO) ioModel.getIOs(element -> element.getType() == IO.IOType.DIGITAL &&
-                element.getDefaultName().equals(defaultName))[0];
+                element.getDefaultName().equals(defaultName)).iterator().next();
     }
 }
