@@ -120,12 +120,12 @@ public class LiveControl {
         cancel();
         new Thread(() -> {
             isRunning.set(true);
-            fastForward();
-            awaitSensorState(1, true);
-            awaitSensorState(1, false);
-            slowForward();
+            fastReverse();
             awaitSensorState(2, true);
             awaitSensorState(2, false);
+            slowReverse();
+            awaitSensorState(1, true);
+            awaitSensorState(1, false);
             stop();
             isRunning.set(false);
         }).start();
