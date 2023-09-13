@@ -1,5 +1,6 @@
 package com.meulenkamp.discretemanipulator.program;
 
+import com.meulenkamp.discretemanipulator.general.LiveControl;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProgramView
         extends StyledView
@@ -22,6 +24,11 @@ public class ProgramView
     protected JLabel errorLabel = new JLabel("");
     private final JRadioButton clockwise = new JRadioButton();
     private final JRadioButton counterClockwise = new JRadioButton();
+
+    final JCheckBox leftSensorState = new JCheckBox("", false);
+    final JCheckBox rightSensorState = new JCheckBox("", false);
+
+    private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
 
     public ProgramView(final ViewAPIProvider apiProvider, final Style style) {
         super(style);
@@ -69,24 +76,8 @@ public class ProgramView
     ) {
 
         final Box sensorStateBox = Box.createHorizontalBox();
-        final JCheckBox leftSensorState = new JCheckBox("", false);
-        final JCheckBox rightSensorState = new JCheckBox("", false);
         leftSensorState.setEnabled(false);
         rightSensorState.setEnabled(false);
-
-        new Thread(() -> {
-            try {
-                // wait with updating UI until stuff has started
-                Thread.sleep(1500);
-                while (true) {
-                    leftSensorState.setSelected(provider.get().getLiveControl().isSensorActive(1));
-                    rightSensorState.setSelected(provider.get().getLiveControl().isSensorActive(2));
-                    Thread.sleep(50);
-                }
-            } catch (InterruptedException e) {
-                return;
-            }
-        }).start();
 
         sensorStateBox.add(new JLabel("Sensors:"));
         sensorStateBox.add(style.createHorizontalSpacing());
@@ -257,5 +248,24 @@ public class ProgramView
 
     public void setMoves(final int moves) {
         textField.setText(Integer.toString(moves));
+    }
+
+    public void startUpdating(final LiveControl liveControl) {
+        this.shouldUpdate.set(true);
+        new Thread(() -> {
+            while (this.shouldUpdate.get()) {
+                this.leftSensorState.setSelected(liveControl.isSensorActive(1));
+                this.rightSensorState.setSelected(liveControl.isSensorActive(2));
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
+
+    public void stopUpdating() {
+        this.shouldUpdate.set(false);
     }
 }

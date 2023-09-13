@@ -54,10 +54,12 @@ public class ProgramContribution
     public void openView() {
         view.setDirection(getDirection());
         view.setMoves(getMoves());
+        view.startUpdating(getLiveControl());
     }
 
     @Override
     public void closeView() {
+        view.stopUpdating();
     }
 
     @Override
