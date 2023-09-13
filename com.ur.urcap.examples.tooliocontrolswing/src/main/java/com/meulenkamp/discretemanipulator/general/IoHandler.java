@@ -37,9 +37,7 @@ public class IoHandler {
      *  config_out[7]
      */
     public DigitalIO getDigitalIO(final String defaultName) {
-        return (DigitalIO) ioModel.getIOs().stream()
-                .filter(element -> element.getType() == IO.IOType.DIGITAL && element.getDefaultName().equals(defaultName))
-                .findFirst()
-                .orElse(null);
+        return (DigitalIO) ioModel.getIOs(element -> element.getType() == IO.IOType.DIGITAL &&
+                element.getDefaultName().equals(defaultName))[0];
     }
 }
