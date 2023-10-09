@@ -7,7 +7,6 @@ import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
-import com.ur.urcap.api.domain.io.IOModel;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 import com.ur.urcap.api.domain.undoredo.UndoRedoManager;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputCallback;
@@ -28,7 +27,7 @@ public class ProgramContribution
     private final UndoRedoManager undoRedoManager;
     private final KeyboardInputFactory keyboardFactory;
     private final DataModel model;
-    private final LiveControl liveControl;
+    private LiveControl liveControl;
 
     private final IOHandler ioHandler;
 
@@ -48,9 +47,6 @@ public class ProgramContribution
         this.view = view;
         this.model = model;
         this.ioHandler = new IOHandler(apiProvider.getProgramAPI().getIOModel());
-        this.liveControl = new LiveControl(
-                apiProvider.getProgramAPI().getIOModel(), this::getInstallation
-        );
     }
 
     @Override
@@ -125,6 +121,19 @@ public class ProgramContribution
     }
 
     public LiveControl getLiveControl() {
+        // FIXME I want to create LiveControl directly in ProgramView, but it's unclear if the values are updating in
+        // between renders 🤔
+        if (liveControl == null) {
+            InstallationContribution installation = getInstallation();
+
+            this.liveControl = new LiveControl(
+                ioHandler.getDigitalIO(installation.getSensor1Input()),
+                ioHandler.getDigitalIO(installation.getSensor2Input()),
+                ioHandler.getDigitalIO(installation.getFastOutput()),
+                ioHandler.getDigitalIO(installation.getSlowOutput()),
+                ioHandler.getDigitalIO(installation.getReverseOutput())
+            );
+        }
         return liveControl;
     }
 

@@ -1,132 +1,104 @@
 package com.meulenkamp.discretemanipulator.general;
 
-import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
-import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.io.DigitalIO;
-import com.ur.urcap.api.domain.io.IOModel;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 public class LiveControl {
-    private final IOHandler ioHandler;
-    private final Supplier<InstallationContribution> installationSupplier;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    public LiveControl(final IOModel ioModel, final Supplier<InstallationContribution> installationSupplier) {
-        this.ioHandler = new IOHandler(ioModel);
-        this.installationSupplier = installationSupplier;
-    }
+    private final DigitalIO sensor1Input;
+    private final DigitalIO sensor2Input;
 
-    public DigitalIO sensorInput(final int sensor) {
-        if (sensor == 1) {
-            return ioHandler.getDigitalIO(
-                    installationSupplier.get().getSensor1Input()
-            );
-        }
-        return ioHandler.getDigitalIO(
-                installationSupplier.get().getSensor2Input()
-        );
-    }
+    private final DigitalIO fastOutput;
 
-    public DigitalIO fastOut() {
-        return ioHandler.getDigitalIO(
-                installationSupplier.get().getFastOutput()
-        );
-    }
+    private final DigitalIO slowOutput;
 
-    public DigitalIO slowOut() {
-        return ioHandler.getDigitalIO(
-                installationSupplier.get().getSlowOutput()
-        );
-    }
+    private final DigitalIO reverseOutput;
 
-    public DigitalIO reverseOut() {
-        return ioHandler.getDigitalIO(
-                installationSupplier.get().getReverseOutput()
-        );
-    }
-
-    public boolean isSensorActive(final int sensor) {
-        return sensorInput(sensor).getValue();
-    }
-
-    public void awaitSensorState(final int sensor, final boolean state) {
-        while (isSensorActive(sensor) != state && isRunning.get()) {
-            // don't hate me java gods
-        };
-    }
-
-    public void setOutputs(
-            final boolean reverse, final boolean fast, final boolean slow
+    public LiveControl(
+            DigitalIO sensor1Input,
+            DigitalIO sensor2Input,
+            DigitalIO fastOutput,
+            DigitalIO slowOutput,
+            DigitalIO reverseOutput
     ) {
-        reverseOut().setValue(reverse);
-        fastOut().setValue(fast);
-        slowOut().setValue(slow);
+        this.sensor1Input = sensor1Input;
+        this.sensor2Input = sensor2Input;
+        this.fastOutput = fastOutput;
+        this.slowOutput = slowOutput;
+        this.reverseOutput = reverseOutput;
+    }
+
+    public void awaitSensorState(final DigitalIO sensor, final boolean state) {
+        while (sensor.getValue() != state && isRunning.get()) ;
     }
 
     public void fastForward() {
-        setOutputs(false, true, false);
+        reverseOutput.setValue(false);
+        fastOutput.setValue(true);
+        slowOutput.setValue(false);
     }
 
     public void fastReverse() {
-        setOutputs(true, true, false);
+        reverseOutput.setValue(true);
+        fastOutput.setValue(true);
+        slowOutput.setValue(false);
     }
 
     public void slowForward() {
-        setOutputs(false, false, true);
+        reverseOutput.setValue(false);
+        fastOutput.setValue(false);
+        slowOutput.setValue(true);
     }
 
     public void slowReverse() {
-        setOutputs(true, false, true);
-    }
-
-    private void stopMovement() {
-        setOutputs(false, false, false);
+        reverseOutput.setValue(true);
+        fastOutput.setValue(false);
+        slowOutput.setValue(true);
     }
 
     public void stop() {
-        cancel();
-        stopMovement();
-    }
-
-    public void cancel() {
-        if (isRunning.get()) {
-            isRunning.set(false);
-        }
+        isRunning.set(false);
+        reverseOutput.setValue(false);
+        fastOutput.setValue(false);
+        slowOutput.setValue(false);
     }
 
     public void next() {
-        cancel();
+        isRunning.set(true);
         new Thread(() -> {
-            isRunning.set(true);
-            fastForward();
+            try {
+                isRunning.set(true);
+                fastForward();
 //            awaitSensorState(1, true);
-            awaitSensorState(1, false);
-            awaitSensorState(1, true);
-            slowForward();
+                awaitSensorState(sensor1Input, false);
+                awaitSensorState(sensor1Input, true);
+                slowForward();
 //            awaitSensorState(2, true);
-            awaitSensorState(2, false);
-            awaitSensorState(2, true);
-            stop();
-            isRunning.set(false);
+                awaitSensorState(sensor2Input, false);
+                awaitSensorState(sensor2Input, true);
+            } finally {
+                stop();
+            }
         }).start();
     }
 
     public void previous() {
-        cancel();
+        isRunning.set(true);
         new Thread(() -> {
-            isRunning.set(true);
-            fastReverse();
-//            awaitSensorState(2, true);
-            awaitSensorState(2, false);
-            awaitSensorState(2, true);
-            slowReverse();
-//            awaitSensorState(1, true);
-            awaitSensorState(1, false);
-            awaitSensorState(1, true);
-            stop();
-            isRunning.set(false);
+            try {
+                fastReverse();
+                //            awaitSensorState(2, true);
+                awaitSensorState(sensor2Input, false);
+                awaitSensorState(sensor2Input, true);
+                slowReverse();
+                //            awaitSensorState(1, true);
+                awaitSensorState(sensor1Input, false);
+                awaitSensorState(sensor1Input, true);
+            } finally {
+                stop();
+            }
         }).start();
     }
 }

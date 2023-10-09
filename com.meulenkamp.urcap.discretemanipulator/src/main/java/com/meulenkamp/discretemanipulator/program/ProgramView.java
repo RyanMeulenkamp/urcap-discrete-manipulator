@@ -107,6 +107,7 @@ public class ProgramView
 
         previous.addChangeListener(event -> {
             if (previous.getModel().isPressed()) {
+                // FIXME I wonder if provider should be supplied here, or can be 'gotten' in `buildUI`?
                 provider.get().getLiveControl().previous();
             }
         });
