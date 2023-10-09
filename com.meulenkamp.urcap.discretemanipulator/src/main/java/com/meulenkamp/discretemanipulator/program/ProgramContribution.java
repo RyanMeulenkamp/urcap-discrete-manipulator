@@ -54,8 +54,8 @@ public class ProgramContribution
         view.setDirection(getDirection());
         view.setMoves(getMoves());
         view.startUpdating(
-            ioHandler.getDigitalIO(getInstallation().getSensor1Input()),
-            ioHandler.getDigitalIO(getInstallation().getSensor2Input())
+            ioHandler.getDigitalIO(getInstallation().getLeftSensorInput()),
+            ioHandler.getDigitalIO(getInstallation().getRightSensorInput())
         );
     }
 
@@ -127,8 +127,8 @@ public class ProgramContribution
             InstallationContribution installation = getInstallation();
 
             this.liveControl = new LiveControl(
-                ioHandler.getDigitalIO(installation.getSensor1Input()),
-                ioHandler.getDigitalIO(installation.getSensor2Input()),
+                ioHandler.getDigitalIO(installation.getLeftSensorInput()),
+                ioHandler.getDigitalIO(installation.getRightSensorInput()),
                 ioHandler.getDigitalIO(installation.getFastOutput()),
                 ioHandler.getDigitalIO(installation.getSlowOutput()),
                 ioHandler.getDigitalIO(installation.getReverseOutput())

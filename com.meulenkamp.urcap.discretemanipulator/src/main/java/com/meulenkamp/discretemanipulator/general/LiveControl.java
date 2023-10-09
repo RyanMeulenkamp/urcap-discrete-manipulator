@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LiveControl {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    private final DigitalIO sensor1Input;
-    private final DigitalIO sensor2Input;
+    private final DigitalIO leftSensorInput;
+    private final DigitalIO rightSensorInput;
 
     private final DigitalIO fastOutput;
 
@@ -17,14 +17,14 @@ public class LiveControl {
     private final DigitalIO reverseOutput;
 
     public LiveControl(
-            DigitalIO sensor1Input,
-            DigitalIO sensor2Input,
+            DigitalIO leftSensorInput,
+            DigitalIO rightSensorInput,
             DigitalIO fastOutput,
             DigitalIO slowOutput,
             DigitalIO reverseOutput
     ) {
-        this.sensor1Input = sensor1Input;
-        this.sensor2Input = sensor2Input;
+        this.leftSensorInput = leftSensorInput;
+        this.rightSensorInput = rightSensorInput;
         this.fastOutput = fastOutput;
         this.slowOutput = slowOutput;
         this.reverseOutput = reverseOutput;
@@ -72,12 +72,12 @@ public class LiveControl {
                 isRunning.set(true);
                 fastForward();
 //            awaitSensorState(1, true);
-                awaitSensorState(sensor1Input, false);
-                awaitSensorState(sensor1Input, true);
+                awaitSensorState(leftSensorInput, false);
+                awaitSensorState(leftSensorInput, true);
                 slowForward();
 //            awaitSensorState(2, true);
-                awaitSensorState(sensor2Input, false);
-                awaitSensorState(sensor2Input, true);
+                awaitSensorState(rightSensorInput, false);
+                awaitSensorState(rightSensorInput, true);
             } finally {
                 stop();
             }
@@ -90,12 +90,12 @@ public class LiveControl {
             try {
                 fastReverse();
                 //            awaitSensorState(2, true);
-                awaitSensorState(sensor2Input, false);
-                awaitSensorState(sensor2Input, true);
+                awaitSensorState(rightSensorInput, false);
+                awaitSensorState(rightSensorInput, true);
                 slowReverse();
                 //            awaitSensorState(1, true);
-                awaitSensorState(sensor1Input, false);
-                awaitSensorState(sensor1Input, true);
+                awaitSensorState(leftSensorInput, false);
+                awaitSensorState(leftSensorInput, true);
             } finally {
                 stop();
             }

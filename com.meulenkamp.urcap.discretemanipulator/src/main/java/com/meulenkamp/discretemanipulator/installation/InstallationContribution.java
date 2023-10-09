@@ -7,8 +7,8 @@ import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 
 public class InstallationContribution implements InstallationNodeContribution {
-    public static final String SENSOR_1_INPUT_KEY = "sensor_1_input";
-    public static final String SENSOR_2_INPUT_KEY = "sensor_2_input";
+    public static final String LEFT_SENSOR_INPUT_KEY = "sensor_1_input";
+    public static final String RIGHT_SENSOR_INPUT_KEY = "sensor_2_input";
     public static final String FAST_OUTPUT_KEY = "fast_output";
     public static final String SLOW_OUTPUT_KEY = "slow_output";
     public static final String REVERSE_OUTPUT_KEY = "reverse_output";
@@ -43,8 +43,8 @@ public class InstallationContribution implements InstallationNodeContribution {
         view.setInputs(getIos(true));
         view.setOutputs(getIos(false));
 
-        view.setSensor1Input(model.get(SENSOR_1_INPUT_KEY, ""));
-        view.setSensor2Input(model.get(SENSOR_2_INPUT_KEY, ""));
+        view.setLeftSensorInput(model.get(LEFT_SENSOR_INPUT_KEY, ""));
+        view.setRightSensorInput(model.get(RIGHT_SENSOR_INPUT_KEY, ""));
         view.setFastOutput(model.get(FAST_OUTPUT_KEY, ""));
         view.setSlowOutput(model.get(SLOW_OUTPUT_KEY, ""));
         view.setReverseOutput(model.get(REVERSE_OUTPUT_KEY, ""));
@@ -80,12 +80,12 @@ public class InstallationContribution implements InstallationNodeContribution {
 
     @Override
     public void generateScript(final ScriptWriter writer) {
-        writer.defineFunction("read_sensor1");
-        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getSensor1Input()), getIoNumber(getSensor1Input())));
+        writer.defineFunction("read_left_sensor");
+        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getLeftSensorInput()), getIoNumber(getLeftSensorInput())));
         writer.end();
 
-        writer.defineFunction("read_sensor2");
-        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getSensor2Input()), getIoNumber(getSensor1Input())));
+        writer.defineFunction("read_right_sensor");
+        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getRightSensorInput()), getIoNumber(getLeftSensorInput())));
         writer.end();
 
         writer.defineFunction("fast");
@@ -117,12 +117,12 @@ public class InstallationContribution implements InstallationNodeContribution {
         model.set(ioKey, ioPin);
     }
 
-    public String getSensor1Input() {
-        return model.get(SENSOR_1_INPUT_KEY, "");
+    public String getLeftSensorInput() {
+        return model.get(LEFT_SENSOR_INPUT_KEY, "");
     }
 
-    public String getSensor2Input() {
-        return model.get(SENSOR_2_INPUT_KEY, "");
+    public String getRightSensorInput() {
+        return model.get(RIGHT_SENSOR_INPUT_KEY, "");
     }
 
     public String getFastOutput() {

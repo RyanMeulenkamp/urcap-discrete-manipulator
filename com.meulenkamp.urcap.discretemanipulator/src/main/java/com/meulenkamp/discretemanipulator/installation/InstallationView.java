@@ -13,8 +13,8 @@ import static com.meulenkamp.discretemanipulator.installation.InstallationContri
 public class InstallationView
 		implements SwingInstallationNodeView<InstallationContribution> {
 
-	private final JComboBox<String> sensor1 = new JComboBox<>();
-	private final JComboBox<String> sensor2 = new JComboBox<>();
+	private final JComboBox<String> leftSensor = new JComboBox<>();
+	private final JComboBox<String> rightSensor = new JComboBox<>();
 	private final JComboBox<String> slowOut = new JComboBox<>();
 	private final JComboBox<String> fastOut = new JComboBox<>();
 	private final JComboBox<String> reverseOut = new JComboBox<>();
@@ -77,21 +77,21 @@ public class InstallationView
 	) {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		final JLabel sensor1Label = new JLabel("Sensor 1");
-		final JLabel sensor2Label = new JLabel("Sensor 2");
+		final JLabel leftSensorLabel = new JLabel("Left sensor");
+		final JLabel rightSensorLabel = new JLabel("Right sensor");
 		final JLabel slowOutLabel = new JLabel("Slow output");
 		final JLabel fastOutLabel = new JLabel("Fast output");
 		final JLabel reverseOutLabel = new JLabel("Reverse output");
 
 		setWidest(
-				sensor1Label, sensor2Label, slowOutLabel, fastOutLabel,
+				leftSensorLabel, rightSensorLabel, slowOutLabel, fastOutLabel,
 				reverseOutLabel
 		);
 		addChooser(
-				sensor1, sensor1Label, SENSOR_1_INPUT_KEY, contribution, panel
+				leftSensor, leftSensorLabel, LEFT_SENSOR_INPUT_KEY, contribution, panel
 		);
 		addChooser(
-				sensor2, sensor2Label, SENSOR_2_INPUT_KEY, contribution, panel
+				rightSensor, rightSensorLabel, RIGHT_SENSOR_INPUT_KEY, contribution, panel
 		);
 		addChooser(slowOut, slowOutLabel, SLOW_OUTPUT_KEY, contribution, panel);
 		addChooser(fastOut, fastOutLabel, FAST_OUTPUT_KEY, contribution, panel);
@@ -123,24 +123,24 @@ public class InstallationView
 	}
 
 	public void setInputs(final IO ... ios) {
-		setInputsFor(sensor1, ios);
-		setInputsFor(sensor2, ios);
-		setWidest(sensor1, sensor2, slowOut, fastOut, reverseOut);
+		setInputsFor(leftSensor, ios);
+		setInputsFor(rightSensor, ios);
+		setWidest(leftSensor, rightSensor, slowOut, fastOut, reverseOut);
 	}
 
 	public void setOutputs(final IO ... ios) {
 		setOutputsFor(slowOut, ios);
 		setOutputsFor(fastOut, ios);
 		setOutputsFor(reverseOut, ios);
-		setWidest(sensor1, sensor2, slowOut, fastOut, reverseOut);
+		setWidest(leftSensor, rightSensor, slowOut, fastOut, reverseOut);
 	}
 
-	public void setSensor1Input(final String input) {
-		sensor1.setSelectedItem(input);
+	public void setLeftSensorInput(final String input) {
+		leftSensor.setSelectedItem(input);
 	}
 
-	public void setSensor2Input(final String input) {
-		sensor2.setSelectedItem(input);
+	public void setRightSensorInput(final String input) {
+		rightSensor.setSelectedItem(input);
 	}
 
 	public void setSlowOutput(final String output) {
@@ -155,12 +155,12 @@ public class InstallationView
 		reverseOut.setSelectedItem(output);
 	}
 
-	public String getSensor1Input() {
-		return (String) sensor1.getSelectedItem();
+	public String getLeftSensorInput() {
+		return (String) leftSensor.getSelectedItem();
 	}
 
-	public String getSensor2Input() {
-		return (String) sensor2.getSelectedItem();
+	public String getRightSensorInput() {
+		return (String) rightSensor.getSelectedItem();
 	}
 
 	public String getSlowOutput() {

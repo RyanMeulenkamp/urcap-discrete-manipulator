@@ -1,26 +1,26 @@
 package com.meulenkamp.discretemanipulator.model;
 
 public class Configuration {
-    private String sensor1Input = "";
-    private String sensor2Input = "";
+    private String leftSensorInput = "";
+    private String rightSensorInput = "";
     private String fastOutput = "";
     private String slowOutput = "";
     private String reverseOutput = "";
 
-    public String getSensor1Input() {
-        return sensor1Input;
+    public String getLeftSensorInput() {
+        return leftSensorInput;
     }
 
-    public void setSensor1Input(final String sensor1Input) {
-        this.sensor1Input = sensor1Input;
+    public void setLeftSensorInput(final String leftSensorInput) {
+        this.leftSensorInput = leftSensorInput;
     }
 
-    public String getSensor2Input() {
-        return sensor2Input;
+    public String getRightSensorInput() {
+        return rightSensorInput;
     }
 
-    public void setSensor2Input(final String sensor2Input) {
-        this.sensor2Input = sensor2Input;
+    public void setRightSensorInput(final String rightSensorInput) {
+        this.rightSensorInput = rightSensorInput;
     }
 
     public String getFastOutput() {
