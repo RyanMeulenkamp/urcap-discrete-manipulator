@@ -9,12 +9,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class LiveControl {
-    private final IoHandler ioHandler;
+    private final IOHandler ioHandler;
     private final Supplier<InstallationContribution> installationSupplier;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public LiveControl(final IOModel ioModel, final Supplier<InstallationContribution> installationSupplier) {
-        this.ioHandler = new IoHandler(ioModel);
+        this.ioHandler = new IOHandler(ioModel);
         this.installationSupplier = installationSupplier;
     }
 

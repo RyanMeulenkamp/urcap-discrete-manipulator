@@ -1,11 +1,13 @@
 package com.meulenkamp.discretemanipulator.program;
 
+import com.meulenkamp.discretemanipulator.general.IOHandler;
 import com.meulenkamp.discretemanipulator.general.LiveControl;
 import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
 
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
+import com.ur.urcap.api.domain.io.IOModel;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 import com.ur.urcap.api.domain.undoredo.UndoRedoManager;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputCallback;
@@ -28,6 +30,8 @@ public class ProgramContribution
     private final DataModel model;
     private final LiveControl liveControl;
 
+    private final IOHandler ioHandler;
+
     public ProgramContribution(
             final ProgramAPIProvider apiProvider,
             final ProgramView view,
@@ -43,6 +47,7 @@ public class ProgramContribution
                 .getKeyboardInputFactory();
         this.view = view;
         this.model = model;
+        this.ioHandler = new IOHandler(apiProvider.getProgramAPI().getIOModel());
         this.liveControl = new LiveControl(
                 apiProvider.getProgramAPI().getIOModel(), this::getInstallation
         );
@@ -52,7 +57,10 @@ public class ProgramContribution
     public void openView() {
         view.setDirection(getDirection());
         view.setMoves(getMoves());
-        view.startUpdating(getLiveControl());
+        view.startUpdating(
+            ioHandler.getDigitalIO(getInstallation().getSensor1Input()),
+            ioHandler.getDigitalIO(getInstallation().getSensor2Input())
+        );
     }
 
     @Override

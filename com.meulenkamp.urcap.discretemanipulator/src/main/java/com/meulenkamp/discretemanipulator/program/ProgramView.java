@@ -1,11 +1,11 @@
 package com.meulenkamp.discretemanipulator.program;
 
-import com.meulenkamp.discretemanipulator.general.LiveControl;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
 import com.ur.urcap.api.contribution.program.swing.SwingProgramNodeView;
 import com.meulenkamp.discretemanipulator.general.Style;
+import com.ur.urcap.api.domain.io.DigitalIO;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardNumberInput;
 
 import javax.swing.*;
@@ -247,12 +247,12 @@ public class ProgramView
         textField.setText(Integer.toString(moves));
     }
 
-    public void startUpdating(final LiveControl liveControl) {
+    public void startUpdating(final DigitalIO leftSensor, final DigitalIO rightSensor) {
         this.shouldUpdate.set(true);
         new Thread(() -> {
             while (this.shouldUpdate.get()) {
-                this.leftSensorState.setSelected(liveControl.isSensorActive(1));
-                this.rightSensorState.setSelected(liveControl.isSensorActive(2));
+                this.leftSensorState.setSelected(leftSensor.getValue());
+                this.rightSensorState.setSelected(rightSensor.getValue());
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {

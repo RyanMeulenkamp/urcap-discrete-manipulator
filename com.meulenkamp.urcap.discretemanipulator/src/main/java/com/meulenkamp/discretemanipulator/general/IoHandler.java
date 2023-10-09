@@ -4,11 +4,11 @@ import com.ur.urcap.api.domain.io.DigitalIO;
 import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.io.IOModel;
 
-public class IoHandler {
+public class IOHandler {
 
     private final IOModel ioModel;
 
-    public IoHandler(IOModel ioModel) {
+    public IOHandler(IOModel ioModel) {
         this.ioModel = ioModel;
     }
 
