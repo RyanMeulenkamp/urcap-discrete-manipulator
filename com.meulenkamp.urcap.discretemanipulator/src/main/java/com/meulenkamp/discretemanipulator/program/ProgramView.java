@@ -239,11 +239,8 @@ public class ProgramView
     }
 
     public void setDirection(final boolean direction) {
-        if (direction) {
-            clockwise.setSelected(true);
-        } else {
-            counterClockwise.setSelected(true);
-        }
+        clockwise.setSelected(direction);
+        counterClockwise.setSelected(!direction);
     }
 
     public void setMoves(final int moves) {
