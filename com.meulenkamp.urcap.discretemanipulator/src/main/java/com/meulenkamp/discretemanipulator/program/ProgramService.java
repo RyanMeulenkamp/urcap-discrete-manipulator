@@ -1,13 +1,13 @@
 package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.V3Style;
+import com.meulenkamp.discretemanipulator.general.V5Style;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
 import com.ur.urcap.api.contribution.program.ContributionConfiguration;
 import com.ur.urcap.api.contribution.program.CreationContext;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.contribution.program.swing.SwingProgramNodeService;
 import com.ur.urcap.api.domain.data.DataModel;
-import com.meulenkamp.discretemanipulator.general.V5Style;
 
 import java.util.Locale;
 

@@ -1,17 +1,24 @@
 package com.meulenkamp.discretemanipulator.installation;
 
+import com.meulenkamp.discretemanipulator.general.RunState;
 import com.ur.urcap.api.contribution.InstallationNodeContribution;
 import com.ur.urcap.api.contribution.installation.InstallationAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 
+import java.util.stream.Stream;
+
 public class InstallationContribution implements InstallationNodeContribution {
+    private static final String INPUT = "get_%s_in";
+    private static final String OUTPUT = "set_%s_out";
+    private static final String RUNSTATE = "set_runstate_%s_output_to_value";
     public static final String LEFT_SENSOR_INPUT_KEY = "sensor_1_input";
     public static final String RIGHT_SENSOR_INPUT_KEY = "sensor_2_input";
     public static final String FAST_OUTPUT_KEY = "fast_output";
     public static final String SLOW_OUTPUT_KEY = "slow_output";
     public static final String REVERSE_OUTPUT_KEY = "reverse_output";
+
     private final InstallationView view;
     private final DataModel model;
     private final InstallationAPIProvider apiProvider;
@@ -56,64 +63,94 @@ public class InstallationContribution implements InstallationNodeContribution {
         active = false;
     }
 
-    private String functionName(final String io) {
+    private String functionNameStub(final String io) {
         if (io.startsWith("config")) {
             return "configurable_digital";
-        } else if (io.startsWith("digital")) {
-            return "standard_digital";
-        } else {
+        } else if (io.startsWith("tool")) {
             return "tool_digital";
+        } else {
+            return "standard_digital";
         }
     }
 
-    private String inputFunctionName(final String io) {
-        return String.format("get_%s_in", functionName(io));
-    }
-
-    private String outputFunctionName(final String io) {
-        return String.format("set_%s_out", functionName(io));
+    private String functionName(final String format, final String io) {
+        return String.format(format, functionNameStub(io));
     }
 
     private int getIoNumber(final String name) {
         return Integer.parseInt(name.replaceAll("\\D+", ""));
     }
 
+    private void setRunstate(
+            final ScriptWriter writer, final String output,
+            final RunState runState
+    ) {
+        writer.appendLine(String.format(
+                "%s(%s, %d)", functionName(RUNSTATE, output),
+                getIoNumber(output), runState.getValue()
+        ));
+    }
+
+    private void readInput(
+            final ScriptWriter writer, final String input
+    ) {
+        writer.appendLine(String.format(
+                "return %s(%s)", functionName(INPUT, input),
+                getIoNumber(input)
+        ));
+    }
+
+    private void setOutput(
+            final ScriptWriter writer, final String output, final boolean value
+    ) {
+        writer.appendLine(String.format(
+                "%s(%s, %s)", functionName(OUTPUT, output),
+                getIoNumber(output), value ? "True" : "False"
+        ));
+    }
+
     @Override
     public void generateScript(final ScriptWriter writer) {
+        Stream.of(getFastOutput(), getSlowOutput(), getReverseOutput())
+                .forEach(output ->
+                        setRunstate(writer, output, RunState.LOW_WHEN_STOPPED)
+                );
+
         writer.defineFunction("read_left_sensor");
-        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getLeftSensorInput()), getIoNumber(getLeftSensorInput())));
+        readInput(writer, getLeftSensorInput());
         writer.end();
 
         writer.defineFunction("read_right_sensor");
-        writer.appendLine(String.format("return %s(%s)", inputFunctionName(getRightSensorInput()), getIoNumber(getLeftSensorInput())));
+        readInput(writer, getRightSensorInput());
         writer.end();
 
         writer.defineFunction("fast");
-        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
-        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        setOutput(writer, getSlowOutput(), false);
+        setOutput(writer, getFastOutput(), true);
         writer.end();
 
         writer.defineFunction("slow");
-        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
-        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        setOutput(writer, getFastOutput(), false);
+        setOutput(writer, getSlowOutput(), true);
         writer.end();
 
         writer.defineFunction("stop");
-        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getSlowOutput()), getIoNumber(getSlowOutput())));
-        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getFastOutput()), getIoNumber(getFastOutput())));
+        setOutput(writer, getFastOutput(), false);
+        setOutput(writer, getSlowOutput(), false);
         writer.end();
 
         writer.defineFunction("forward");
-        writer.appendLine(String.format("%s(%s, False)", outputFunctionName(getReverseOutput()), getIoNumber(getReverseOutput())));
+        setOutput(writer, getReverseOutput(), false);
         writer.end();
 
         writer.defineFunction("reverse");
-        writer.appendLine(String.format("%s(%s, True)", outputFunctionName(getReverseOutput()), getIoNumber(getReverseOutput())));
+        setOutput(writer, getReverseOutput(), true);
         writer.end();
+
+        System.out.println("Resulting (install) script:\n\n" + writer.generateScript());
     }
 
     public void ioChanged(final String ioKey, final String ioPin) {
-        System.out.println("ioChanged: " + ioKey + " = " + ioPin);
         model.set(ioKey, ioPin);
     }
 

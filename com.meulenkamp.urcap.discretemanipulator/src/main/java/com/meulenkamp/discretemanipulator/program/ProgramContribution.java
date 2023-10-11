@@ -1,7 +1,6 @@
 package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.IOHandler;
-import com.meulenkamp.discretemanipulator.general.LiveControl;
 import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
 
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
@@ -79,7 +78,8 @@ public class ProgramContribution
 
     @Override
     public void generateScript(final ScriptWriter writer) {
-        new ScriptGenerator(writer, model).move(getDirection(), getMoves());
+        new ScriptGenerator(writer).move(getDirection(), getMoves());
+        System.out.println("Resulting (program) script:\n\n" + writer.generateScript());
     }
 
     public boolean getDirection() {

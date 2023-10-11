@@ -4,11 +4,11 @@ import com.ur.urcap.api.domain.io.DigitalIO;
 import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.io.IOModel;
 
-public class IOHandler {
+public class IoHandler {
 
     private final IOModel ioModel;
 
-    public IOHandler(IOModel ioModel) {
+    public IoHandler(final IOModel ioModel) {
         this.ioModel = ioModel;
     }
 
@@ -37,7 +37,10 @@ public class IOHandler {
      *  config_out[7]
      */
     public DigitalIO getDigitalIO(final String defaultName) {
-        return (DigitalIO) ioModel.getIOs(element -> element.getType() == IO.IOType.DIGITAL &&
-                element.getDefaultName().equals(defaultName)).iterator().next();
+        return (DigitalIO) ioModel.getIOs(
+                element -> element.getType() == IO.IOType.DIGITAL
+                        && element.getDefaultName().equals(defaultName))
+                .iterator()
+                .next();
     }
 }

@@ -6,14 +6,9 @@ import com.ur.urcap.api.domain.script.ScriptWriter;
 
 public class ScriptGenerator {
     private final ScriptWriter writer;
-    private final DataModel model;
 
-    public ScriptGenerator(
-            final ScriptWriter writer,
-            final DataModel model
-    ) {
+    public ScriptGenerator(final ScriptWriter writer) {
         this.writer = writer;
-        this.model = model;
     }
 
     private void forward() {
@@ -40,6 +35,7 @@ public class ScriptGenerator {
         writer.whileCondition(String.format(
             "%s() != %s", inputFn, state ? "True" : "False"
         ));
+        writer.appendLine("continue");
         writer.end();
     }
 

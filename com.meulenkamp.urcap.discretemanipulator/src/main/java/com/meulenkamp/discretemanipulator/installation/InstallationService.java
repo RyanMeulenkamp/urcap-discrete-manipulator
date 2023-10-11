@@ -2,7 +2,6 @@ package com.meulenkamp.discretemanipulator.installation;
 
 import com.meulenkamp.discretemanipulator.general.V3Style;
 import com.meulenkamp.discretemanipulator.general.V5Style;
-import com.meulenkamp.discretemanipulator.model.Configuration;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
 import com.ur.urcap.api.contribution.installation.ContributionConfiguration;
 import com.ur.urcap.api.contribution.installation.CreationContext;

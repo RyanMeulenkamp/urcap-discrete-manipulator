@@ -1,4 +1,4 @@
-package com.meulenkamp.discretemanipulator.general;
+package com.meulenkamp.discretemanipulator.program;
 
 import com.ur.urcap.api.domain.io.DigitalIO;
 
@@ -9,19 +9,16 @@ public class LiveControl {
 
     private final DigitalIO leftSensorInput;
     private final DigitalIO rightSensorInput;
-
     private final DigitalIO fastOutput;
-
     private final DigitalIO slowOutput;
-
     private final DigitalIO reverseOutput;
 
     public LiveControl(
-            DigitalIO leftSensorInput,
-            DigitalIO rightSensorInput,
-            DigitalIO fastOutput,
-            DigitalIO slowOutput,
-            DigitalIO reverseOutput
+            final DigitalIO leftSensorInput,
+            final DigitalIO rightSensorInput,
+            final DigitalIO fastOutput,
+            final DigitalIO slowOutput,
+            final DigitalIO reverseOutput
     ) {
         this.leftSensorInput = leftSensorInput;
         this.rightSensorInput = rightSensorInput;
@@ -31,7 +28,7 @@ public class LiveControl {
     }
 
     public void awaitSensorState(final DigitalIO sensor, final boolean state) {
-        while (sensor.getValue() != state && isRunning.get()) ;
+        while (sensor.getValue() != state && isRunning.get());
     }
 
     public void fastForward() {
@@ -69,13 +66,10 @@ public class LiveControl {
         isRunning.set(true);
         new Thread(() -> {
             try {
-                isRunning.set(true);
                 fastForward();
-//            awaitSensorState(1, true);
                 awaitSensorState(leftSensorInput, false);
                 awaitSensorState(leftSensorInput, true);
                 slowForward();
-//            awaitSensorState(2, true);
                 awaitSensorState(rightSensorInput, false);
                 awaitSensorState(rightSensorInput, true);
             } finally {
@@ -89,11 +83,9 @@ public class LiveControl {
         new Thread(() -> {
             try {
                 fastReverse();
-                //            awaitSensorState(2, true);
                 awaitSensorState(rightSensorInput, false);
                 awaitSensorState(rightSensorInput, true);
                 slowReverse();
-                //            awaitSensorState(1, true);
                 awaitSensorState(leftSensorInput, false);
                 awaitSensorState(leftSensorInput, true);
             } finally {
