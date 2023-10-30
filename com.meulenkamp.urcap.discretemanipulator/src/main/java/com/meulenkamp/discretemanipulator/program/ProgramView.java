@@ -1,5 +1,7 @@
 package com.meulenkamp.discretemanipulator.program;
 
+import com.meulenkamp.discretemanipulator.general.DashboardClient;
+import com.meulenkamp.discretemanipulator.general.RobotRealtimeReader;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
@@ -12,12 +14,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.meulenkamp.discretemanipulator.general.DashboardClient.ProgramState.PLAYING;
 
 public class ProgramView
         extends StyledView
         implements SwingProgramNodeView<ProgramContribution> {
+    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     protected final ViewAPIProvider apiProvider;
     protected JTextField textField;
@@ -29,6 +35,7 @@ public class ProgramView
     private final JCheckBox rightSensorState = new JCheckBox("", false);
 
     private LiveControl liveControl;
+    private Box jogButtons;
 
     private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
 
@@ -62,7 +69,7 @@ public class ProgramView
     private ImageIcon scaledIcon(final String name, final int size) {
         return new ImageIcon(new ImageIcon(Objects.requireNonNull(
                 getClass().getResource("/icons/" + name + ".png"
-                ))).getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
+        ))).getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH));
     }
 
     private JButton iconButton(final String name, final int size) {
@@ -74,7 +81,6 @@ public class ProgramView
     }
 
     private Component createSensorPanel() {
-
         final Box sensorStateBox = Box.createHorizontalBox();
         leftSensorState.setEnabled(false);
         rightSensorState.setEnabled(false);
@@ -93,7 +99,7 @@ public class ProgramView
     }
 
     private Box createJogButtons() {
-        final Box jogButtons = Box.createHorizontalBox();
+        jogButtons = Box.createHorizontalBox();
 
         final JButton previous = iconButton("previous", 24);
         final JButton reverseFast = iconButton("fast-reverse", 24);
@@ -266,9 +272,15 @@ public class ProgramView
 
         new Thread(() -> {
             try {
+                final DashboardClient dashboardClient = new DashboardClient();
+                if (!dashboardClient.connect("127.0.0.1")) {
+                    errorMessage("Could not connect to dashboard server");
+                    return;
+                }
                 while (this.shouldUpdate.get()) {
                     this.leftSensorState.setSelected(leftSensor.getValue());
                     this.rightSensorState.setSelected(rightSensor.getValue());
+                    this.jogButtons.setEnabled(PLAYING != dashboardClient.programState());
                     Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
