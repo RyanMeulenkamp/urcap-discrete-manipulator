@@ -112,6 +112,8 @@ public class ProgramView
         previous.addChangeListener(event -> {
             if (previous.getModel().isPressed()) {
                 liveControl.previous();
+            } else {
+                liveControl.stop();
             }
         });
         previous.setToolTipText("Move to previous discrete position");
@@ -156,6 +158,8 @@ public class ProgramView
         next.addChangeListener(event -> {
             if (next.getModel().isPressed()) {
                 this.liveControl.next();
+            } else {
+                liveControl.stop();
             }
         });
         next.setToolTipText("Move to next discrete position");
