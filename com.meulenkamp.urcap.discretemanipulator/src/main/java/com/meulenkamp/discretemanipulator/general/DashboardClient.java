@@ -3,8 +3,6 @@ package com.meulenkamp.discretemanipulator.general;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +24,7 @@ public class DashboardClient {
             }
             closeable.close();
         } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);
+            System.err.printf(e.getMessage());
         }
     }
 
