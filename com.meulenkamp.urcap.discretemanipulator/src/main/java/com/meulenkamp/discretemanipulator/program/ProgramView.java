@@ -1,7 +1,6 @@
 package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.DashboardClient;
-import com.meulenkamp.discretemanipulator.general.RobotRealtimeReader;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
@@ -14,7 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,8 +21,6 @@ import static com.meulenkamp.discretemanipulator.general.DashboardClient.Program
 public class ProgramView
         extends StyledView
         implements SwingProgramNodeView<ProgramContribution> {
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-
     protected final ViewAPIProvider apiProvider;
     protected JTextField textField;
     protected JLabel errorLabel = new JLabel("");
@@ -157,7 +153,7 @@ public class ProgramView
         forwardFast.setToolTipText("Jog clockwise (fast)");
         next.addChangeListener(event -> {
             if (next.getModel().isPressed()) {
-                this.liveControl.next();
+                liveControl.next();
             } else {
                 liveControl.stop();
             }
@@ -262,11 +258,12 @@ public class ProgramView
         DigitalIO slowOutput,
         DigitalIO reverseOutput
     ) {
-        if(liveControl != null) this.liveControl.stop();
+        if(liveControl != null) liveControl.stop();
+        System.out.println("Start Updating!!");
 
-        this.shouldUpdate.set(true);
+        shouldUpdate.set(true);
 
-        this.liveControl = new LiveControl(
+        liveControl = new LiveControl(
             leftSensor,
             rightSensor,
             fastOutput,
@@ -294,7 +291,7 @@ public class ProgramView
     }
 
     public void stopUpdating() {
-        this.shouldUpdate.set(false);
-        this.liveControl.stop();
+        shouldUpdate.set(false);
+        liveControl.stop();
     }
 }
