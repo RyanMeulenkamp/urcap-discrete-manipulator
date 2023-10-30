@@ -25,8 +25,10 @@ public class ProgramView
     private final JRadioButton clockwise = new JRadioButton();
     private final JRadioButton counterClockwise = new JRadioButton();
 
-    final JCheckBox leftSensorState = new JCheckBox("", false);
-    final JCheckBox rightSensorState = new JCheckBox("", false);
+    private final JCheckBox leftSensorState = new JCheckBox("", false);
+    private final JCheckBox rightSensorState = new JCheckBox("", false);
+
+    private LiveControl liveControl;
 
     private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
 
@@ -43,9 +45,9 @@ public class ProgramView
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(errorLabel);
         panel.add(style.createLargeVerticalSpacing());
-        panel.add(createSensorPanel(provider));
+        panel.add(createSensorPanel());
         panel.add(style.createLargeVerticalSpacing());
-        panel.add(createJogButtons(provider));
+        panel.add(createJogButtons());
         panel.add(style.createLargeVerticalSpacing());
         panel.add(new JSeparator());
         panel.add(style.createVerticalSpacing());
@@ -71,9 +73,7 @@ public class ProgramView
         return new JLabel(scaledIcon(name, size));
     }
 
-    private Component createSensorPanel(
-            final ContributionProvider<ProgramContribution> provider
-    ) {
+    private Component createSensorPanel() {
 
         final Box sensorStateBox = Box.createHorizontalBox();
         leftSensorState.setEnabled(false);
@@ -92,9 +92,7 @@ public class ProgramView
         return sensorStateBox;
     }
 
-    private Box createJogButtons(
-            final ContributionProvider<ProgramContribution> provider
-    ) {
+    private Box createJogButtons() {
         final Box jogButtons = Box.createHorizontalBox();
 
         final JButton previous = iconButton("previous", 24);
@@ -107,52 +105,51 @@ public class ProgramView
 
         previous.addChangeListener(event -> {
             if (previous.getModel().isPressed()) {
-                // FIXME I wonder if provider should be supplied here, or can be 'gotten' in `buildUI`?
-                provider.get().getLiveControl().previous();
+                liveControl.previous();
             }
         });
         previous.setToolTipText("Move to previous discrete position");
         reverseFast.addChangeListener(event -> {
             if (reverseFast.getModel().isPressed()) {
-                provider.get().getLiveControl().fastReverse();
+                liveControl.fastReverse();
             } else {
-                provider.get().getLiveControl().stop();
+                liveControl.stop();
             }
         });
         reverseFast.setToolTipText("Jog counter-clockwise (fast)");
         reverseSlow.addChangeListener(event -> {
             if (reverseSlow.getModel().isPressed()) {
-                provider.get().getLiveControl().slowReverse();
+                liveControl.slowReverse();
             } else {
-                provider.get().getLiveControl().stop();
+                liveControl.stop();
             }
         });
         reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
         stop.addChangeListener(event -> {
             if (stop.getModel().isPressed()) {
-                provider.get().getLiveControl().stop();
+                liveControl.stop();
             }
         });
         stop.setToolTipText("Stop movement");
         forwardSlow.addChangeListener(event -> {
             if (forwardSlow.getModel().isPressed()) {
-                provider.get().getLiveControl().slowForward();
+                liveControl.slowForward();
             } else {
-                provider.get().getLiveControl().stop();
+                liveControl.stop();
             }
         });
         forwardSlow.setToolTipText("Jog clockwise (slow)");
         forwardFast.addChangeListener(event -> {
             if (forwardFast.getModel().isPressed()) {
-                provider.get().getLiveControl().fastForward();
+                liveControl.fastForward();
             } else {
-                provider.get().getLiveControl().stop();
+                liveControl.stop();
             }
         });
         forwardFast.setToolTipText("Jog clockwise (fast)");
         next.addChangeListener(event -> {
             if (next.getModel().isPressed()) {
-                provider.get().getLiveControl().next();
+                this.liveControl.next();
             }
         });
         next.setToolTipText("Move to next discrete position");
@@ -248,22 +245,40 @@ public class ProgramView
         textField.setText(Integer.toString(moves));
     }
 
-    public void startUpdating(final DigitalIO leftSensor, final DigitalIO rightSensor) {
+    public void startUpdating(
+        DigitalIO leftSensor,
+        DigitalIO rightSensor,
+        DigitalIO fastOutput,
+        DigitalIO slowOutput,
+        DigitalIO reverseOutput
+    ) {
+        if(liveControl != null) this.liveControl.stop();
+
         this.shouldUpdate.set(true);
+
+        this.liveControl = new LiveControl(
+            leftSensor,
+            rightSensor,
+            fastOutput,
+            slowOutput,
+            reverseOutput
+        );
+
         new Thread(() -> {
-            while (this.shouldUpdate.get()) {
-                this.leftSensorState.setSelected(leftSensor.getValue());
-                this.rightSensorState.setSelected(rightSensor.getValue());
-                try {
+            try {
+                while (this.shouldUpdate.get()) {
+                    this.leftSensorState.setSelected(leftSensor.getValue());
+                    this.rightSensorState.setSelected(rightSensor.getValue());
                     Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
                 }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
 
     public void stopUpdating() {
         this.shouldUpdate.set(false);
+        this.liveControl.stop();
     }
 }

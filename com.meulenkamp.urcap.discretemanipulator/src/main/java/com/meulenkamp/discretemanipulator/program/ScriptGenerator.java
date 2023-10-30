@@ -2,6 +2,8 @@ package com.meulenkamp.discretemanipulator.program;
 
 import com.ur.urcap.api.domain.script.ScriptWriter;
 
+import java.util.stream.IntStream;
+
 public class ScriptGenerator {
     enum Sensor {
         LEFT("read_left_sensor"),
@@ -49,10 +51,10 @@ public class ScriptGenerator {
     public void moveForward(final int moves) {
         forward();
         fast();
-        for (int i = 0; i < moves; i++) {
+        IntStream.range(0, moves).forEach(i -> {
             awaitSensorState(Sensor.LEFT, false);
             awaitSensorState(Sensor.LEFT, true);
-        }
+        });
         slow();
         awaitSensorState(Sensor.RIGHT, false);
         awaitSensorState(Sensor.RIGHT, true);
@@ -62,10 +64,10 @@ public class ScriptGenerator {
     public void moveReverse(final int moves) {
         reverse();
         fast();
-        for (int i = 0; i < moves; i++) {
+        IntStream.range(0, moves).forEach(i -> {
             awaitSensorState(Sensor.RIGHT, false);
             awaitSensorState(Sensor.RIGHT, true);
-        }
+        });
         slow();
         awaitSensorState(Sensor.LEFT, false);
         awaitSensorState(Sensor.LEFT, true);

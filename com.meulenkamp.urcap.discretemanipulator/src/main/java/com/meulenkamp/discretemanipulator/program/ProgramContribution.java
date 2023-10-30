@@ -2,7 +2,6 @@ package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.IOHandler;
 import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
-
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
@@ -50,11 +49,16 @@ public class ProgramContribution
 
     @Override
     public void openView() {
+        InstallationContribution installation = getInstallation();
+
         view.setDirection(getDirection());
         view.setMoves(getMoves());
         view.startUpdating(
-            ioHandler.getDigitalIO(getInstallation().getLeftSensorInput()),
-            ioHandler.getDigitalIO(getInstallation().getRightSensorInput())
+            ioHandler.getDigitalIO(installation.getLeftSensorInput()),
+            ioHandler.getDigitalIO(installation.getRightSensorInput()),
+            ioHandler.getDigitalIO(installation.getFastOutput()),
+            ioHandler.getDigitalIO(installation.getSlowOutput()),
+            ioHandler.getDigitalIO(installation.getReverseOutput())
         );
     }
 
@@ -123,23 +127,6 @@ public class ProgramContribution
                 view.errorMessage("");
             }
         };
-    }
-
-    public LiveControl getLiveControl() {
-        // FIXME I want to create LiveControl directly in ProgramView, but it's unclear if the values are updating in
-        // between renders 🤔
-        if (liveControl == null) {
-            InstallationContribution installation = getInstallation();
-
-            this.liveControl = new LiveControl(
-                ioHandler.getDigitalIO(installation.getLeftSensorInput()),
-                ioHandler.getDigitalIO(installation.getRightSensorInput()),
-                ioHandler.getDigitalIO(installation.getFastOutput()),
-                ioHandler.getDigitalIO(installation.getSlowOutput()),
-                ioHandler.getDigitalIO(installation.getReverseOutput())
-            );
-        }
-        return liveControl;
     }
 
     private InstallationContribution getInstallation() {
