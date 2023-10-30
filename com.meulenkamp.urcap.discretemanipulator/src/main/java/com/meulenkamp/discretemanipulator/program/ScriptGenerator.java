@@ -1,10 +1,17 @@
 package com.meulenkamp.discretemanipulator.program;
 
-import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
-import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 
 public class ScriptGenerator {
+    enum Sensor {
+        LEFT("read_left_sensor"),
+        RIGHT("read_right_sensor");
+
+        final String readfn;
+
+        Sensor(final String readfn) { this.readfn = readfn; }
+    }
+
     private final ScriptWriter writer;
 
     public ScriptGenerator(final ScriptWriter writer) {
@@ -31,32 +38,37 @@ public class ScriptGenerator {
         writer.appendLine("stop()");
     }
 
-    public void awaitInputState(final String inputFn, final boolean state) {
+    public void awaitSensorState(final Sensor sensor, final boolean state) {
         writer.whileCondition(String.format(
-            "%s() != %s", inputFn, state ? "True" : "False"
+            "%s() != %s", sensor.readfn, state ? "True" : "False"
         ));
         writer.appendLine("continue");
         writer.end();
     }
 
-    public void awaitSensor(final int input) {
-        final String inputFn = "read_sensor" + input;
-        awaitInputState(inputFn, false);
-        awaitInputState(inputFn, true);
-    }
-
-    public void move(final boolean forward, final int moves) {
-        if (forward) {
-            forward();
-        } else {
-            reverse();
-        }
+    public void moveForward(final int moves) {
+        forward();
         fast();
         for (int i = 0; i < moves; i++) {
-            awaitSensor(forward ? 1 : 2);
+            awaitSensorState(Sensor.LEFT, false);
+            awaitSensorState(Sensor.LEFT, true);
         }
         slow();
-        awaitSensor(forward ? 2 : 1);
+        awaitSensorState(Sensor.RIGHT, false);
+        awaitSensorState(Sensor.RIGHT, true);
+        stop();
+    }
+
+    public void moveReverse(final int moves) {
+        reverse();
+        fast();
+        for (int i = 0; i < moves; i++) {
+            awaitSensorState(Sensor.RIGHT, false);
+            awaitSensorState(Sensor.RIGHT, true);
+        }
+        slow();
+        awaitSensorState(Sensor.LEFT, false);
+        awaitSensorState(Sensor.LEFT, true);
         stop();
     }
 }

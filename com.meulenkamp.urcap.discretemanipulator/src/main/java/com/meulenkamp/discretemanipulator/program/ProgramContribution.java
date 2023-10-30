@@ -66,7 +66,7 @@ public class ProgramContribution
     @Override
     public String getTitle() {
         return String.format(
-                "Move manipulator %s %d places", getDirection() ? "up" : "down",
+                "Move manipulator %s %d places", getDirection() == FORWARD ? "up" : "down",
                 getMoves()
         );
     }
@@ -78,7 +78,12 @@ public class ProgramContribution
 
     @Override
     public void generateScript(final ScriptWriter writer) {
-        new ScriptGenerator(writer).move(getDirection(), getMoves());
+        ScriptGenerator generator = new ScriptGenerator(writer);
+        if (getDirection() == FORWARD) {
+            generator.moveForward(getMoves());
+        } else {
+            generator.moveReverse(getMoves());
+        }
         System.out.println("Resulting (program) script:\n\n" + writer.generateScript());
     }
 
