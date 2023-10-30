@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -281,7 +282,8 @@ public class ProgramView
                 while (this.shouldUpdate.get()) {
                     this.leftSensorState.setSelected(leftSensor.getValue());
                     this.rightSensorState.setSelected(rightSensor.getValue());
-                    this.jogButtons.setEnabled(PLAYING != dashboardClient.programState());
+                    Arrays.asList(this.jogButtons.getComponents())
+                          .forEach(component -> component.setEnabled(PLAYING != dashboardClient.programState()));
                     Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
