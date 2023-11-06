@@ -1,11 +1,12 @@
 package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.DashboardClient;
+import com.meulenkamp.discretemanipulator.general.RunState;
+import com.meulenkamp.discretemanipulator.general.Style;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
 import com.ur.urcap.api.contribution.ViewAPIProvider;
 import com.ur.urcap.api.contribution.program.swing.SwingProgramNodeView;
-import com.meulenkamp.discretemanipulator.general.Style;
 import com.ur.urcap.api.domain.io.DigitalIO;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardNumberInput;
 
@@ -17,7 +18,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.meulenkamp.discretemanipulator.general.DashboardClient.ProgramState.PLAYING;
+import static com.meulenkamp.discretemanipulator.general.DashboardClient.ProgramState.*;
 
 public class ProgramView
         extends StyledView
@@ -35,6 +36,7 @@ public class ProgramView
     private Box jogButtons;
 
     private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
+    private Thread resetDaemon = null;
 
     public ProgramView(final ViewAPIProvider apiProvider, final Style style) {
         super(style);
@@ -272,24 +274,58 @@ public class ProgramView
             reverseOutput
         );
 
+        final DashboardClient dashboardClient = new DashboardClient();
+        if (!dashboardClient.connect("127.0.0.1")) {
+            errorMessage("Could not connect to dashboard server");
+            return;
+        }
+
+        // FIXME: This thread shouldn't start when the view opens, rather when the program starts.
+        if(resetDaemon == null) {
+            this.resetDaemon = new Thread(() -> {
+                try {
+                    DashboardClient.ProgramState previousState = UNDEFINED;
+
+                    while(true) {
+                        final DashboardClient.ProgramState newState = dashboardClient.programState();
+
+                        // Stop the moving attachments when the program isn't playing anymore
+                        if (previousState == PLAYING && newState != previousState) {
+                            fastOutput.setValue(false);
+                            slowOutput.setValue(false);
+                            reverseOutput.setValue(false);
+                        }
+                        previousState = newState;
+                        Thread.sleep(1);
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    // last effort attempt at stopping the moving attachments
+                    fastOutput.setValue(false);
+                    slowOutput.setValue(false);
+                    reverseOutput.setValue(false);
+                }
+            }, "Reset IO daemon");
+            resetDaemon.start();
+            resetDaemon.setDaemon(true);
+        }
+
         new Thread(() -> {
             try {
-                final DashboardClient dashboardClient = new DashboardClient();
-                if (!dashboardClient.connect("127.0.0.1")) {
-                    errorMessage("Could not connect to dashboard server");
-                    return;
-                }
                 while (this.shouldUpdate.get()) {
                     this.leftSensorState.setSelected(leftSensor.getValue());
                     this.rightSensorState.setSelected(rightSensor.getValue());
+
                     Arrays.asList(this.jogButtons.getComponents())
-                          .forEach(component -> component.setEnabled(PLAYING != dashboardClient.programState()));
+                            .forEach(component -> component.setEnabled(PLAYING != dashboardClient.programState()));
+
                     Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        }, "UI <-> IO sync").start();
     }
 
     public void stopUpdating() {
