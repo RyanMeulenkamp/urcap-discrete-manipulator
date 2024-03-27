@@ -1,7 +1,6 @@
 package com.meulenkamp.discretemanipulator.program;
 
 import com.meulenkamp.discretemanipulator.general.DashboardClient;
-import com.meulenkamp.discretemanipulator.general.RunState;
 import com.meulenkamp.discretemanipulator.general.Style;
 import com.meulenkamp.discretemanipulator.general.StyledView;
 import com.ur.urcap.api.contribution.ContributionProvider;
@@ -36,7 +35,6 @@ public class ProgramView
     private Box jogButtons;
 
     private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
-    private Thread resetDaemon = null;
 
     public ProgramView(final ViewAPIProvider apiProvider, final Style style) {
         super(style);
@@ -109,56 +107,68 @@ public class ProgramView
         final JButton next = iconButton("next", 24);
 
         previous.addChangeListener(event -> {
-            if (previous.getModel().isPressed()) {
-                liveControl.previous();
-            } else {
-                liveControl.stop();
+            if (previous.isEnabled()) {
+                if (previous.getModel().isPressed()) {
+                    liveControl.previous();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         previous.setToolTipText("Move to previous discrete position");
         reverseFast.addChangeListener(event -> {
-            if (reverseFast.getModel().isPressed()) {
-                liveControl.fastReverse();
-            } else {
-                liveControl.stop();
+            if (reverseFast.isEnabled()) {
+                if (reverseFast.getModel().isPressed()) {
+                    liveControl.fastReverse();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         reverseFast.setToolTipText("Jog counter-clockwise (fast)");
         reverseSlow.addChangeListener(event -> {
-            if (reverseSlow.getModel().isPressed()) {
-                liveControl.slowReverse();
-            } else {
-                liveControl.stop();
+            if (reverseSlow.isEnabled()) {
+                if (reverseSlow.getModel().isPressed()) {
+                    liveControl.slowReverse();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
         stop.addChangeListener(event -> {
-            if (stop.getModel().isPressed()) {
+            if (stop.isEnabled() && stop.getModel().isPressed()) {
                 liveControl.stop();
             }
         });
         stop.setToolTipText("Stop movement");
         forwardSlow.addChangeListener(event -> {
-            if (forwardSlow.getModel().isPressed()) {
-                liveControl.slowForward();
-            } else {
-                liveControl.stop();
+            if (forwardSlow.isEnabled()) {
+                if (forwardSlow.getModel().isPressed()) {
+                    liveControl.slowForward();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         forwardSlow.setToolTipText("Jog clockwise (slow)");
         forwardFast.addChangeListener(event -> {
-            if (forwardFast.getModel().isPressed()) {
-                liveControl.fastForward();
-            } else {
-                liveControl.stop();
+            if (forwardFast.isEnabled()) {
+                if (forwardFast.getModel().isPressed()) {
+                    liveControl.fastForward();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         forwardFast.setToolTipText("Jog clockwise (fast)");
         next.addChangeListener(event -> {
-            if (next.getModel().isPressed()) {
-                liveControl.next();
-            } else {
-                liveControl.stop();
+            if (next.isEnabled()) {
+                if (next.getModel().isPressed()) {
+                    liveControl.next();
+                } else {
+                    liveControl.stop();
+                }
             }
         });
         next.setToolTipText("Move to next discrete position");
@@ -255,11 +265,12 @@ public class ProgramView
     }
 
     public void startUpdating(
-        DigitalIO leftSensor,
-        DigitalIO rightSensor,
-        DigitalIO fastOutput,
-        DigitalIO slowOutput,
-        DigitalIO reverseOutput
+        final DashboardClient dashboardClient,
+        final DigitalIO leftSensor,
+        final DigitalIO rightSensor,
+        final DigitalIO fastOutput,
+        final DigitalIO slowOutput,
+        final DigitalIO reverseOutput
     ) {
         if(liveControl != null) liveControl.stop();
         System.out.println("Start Updating!!");
@@ -274,51 +285,20 @@ public class ProgramView
             reverseOutput
         );
 
-        final DashboardClient dashboardClient = new DashboardClient();
-        if (!dashboardClient.connect("127.0.0.1")) {
-            errorMessage("Could not connect to dashboard server");
-            return;
-        }
-
-        // FIXME: This thread shouldn't start when the view opens, rather when the program starts.
-        if(resetDaemon == null) {
-            this.resetDaemon = new Thread(() -> {
-                try {
-                    DashboardClient.ProgramState previousState = UNDEFINED;
-
-                    while(true) {
-                        final DashboardClient.ProgramState newState = dashboardClient.programState();
-
-                        // Stop the moving attachments when the program isn't playing anymore
-                        if (previousState == PLAYING && newState != previousState) {
-                            fastOutput.setValue(false);
-                            slowOutput.setValue(false);
-                            reverseOutput.setValue(false);
-                        }
-                        previousState = newState;
-                        Thread.sleep(1);
-                    }
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    // last effort attempt at stopping the moving attachments
-                    fastOutput.setValue(false);
-                    slowOutput.setValue(false);
-                    reverseOutput.setValue(false);
-                }
-            }, "Reset IO daemon");
-            resetDaemon.start();
-            resetDaemon.setDaemon(true);
-        }
-
         new Thread(() -> {
             try {
+                DashboardClient.ProgramState previousState = UNDEFINED;
+
                 while (this.shouldUpdate.get()) {
+                    final DashboardClient.ProgramState newState = dashboardClient.programState();
+
                     this.leftSensorState.setSelected(leftSensor.getValue());
                     this.rightSensorState.setSelected(rightSensor.getValue());
 
-                    Arrays.asList(this.jogButtons.getComponents())
-                            .forEach(component -> component.setEnabled(PLAYING != dashboardClient.programState()));
+                    if (newState != previousState) {
+                        Arrays.asList(this.jogButtons.getComponents())
+                                .forEach(component -> component.setEnabled(PLAYING != newState));
+                    }
 
                     Thread.sleep(50);
                 }

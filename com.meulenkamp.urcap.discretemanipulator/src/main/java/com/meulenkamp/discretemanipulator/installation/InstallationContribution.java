@@ -111,12 +111,9 @@ public class InstallationContribution implements InstallationNodeContribution {
 
     @Override
     public void generateScript(final ScriptWriter writer) {
-        /*
-        FIXME This is now handled in ProgramView
-        Stream.of(getFastOutput(), getSlowOutput(), getReverseOutput())
-                .forEach(output ->
-                        setRunstate(writer, output, RunState.LOW_WHEN_STOPPED)
-                );*/
+//        FIXME This is now handled in ProgramView
+//        Stream.of(getFastOutput(), getSlowOutput(), getReverseOutput())
+//                .forEach(output -> setRunstate(writer, output, RunState.PRESERVE_STATE));
 
         writer.defineFunction("read_left_sensor");
         readInput(writer, getLeftSensorInput());

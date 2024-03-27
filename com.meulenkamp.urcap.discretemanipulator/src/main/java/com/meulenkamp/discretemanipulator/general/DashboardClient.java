@@ -23,7 +23,7 @@ public class DashboardClient {
                 return;
             }
             closeable.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             System.err.printf(e.getMessage());
         }
     }
@@ -39,7 +39,6 @@ public class DashboardClient {
             this.socket.connect(new InetSocketAddress(host, port));
             this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-            String welcomeMsg = this.reader.readLine();
             return true;
         } catch (final Exception e) {
             System.err.println("Exception!");

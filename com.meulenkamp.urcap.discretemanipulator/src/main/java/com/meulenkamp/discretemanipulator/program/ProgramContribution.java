@@ -1,15 +1,20 @@
 package com.meulenkamp.discretemanipulator.program;
 
+import com.meulenkamp.discretemanipulator.general.DashboardClient;
 import com.meulenkamp.discretemanipulator.general.IOHandler;
 import com.meulenkamp.discretemanipulator.installation.InstallationContribution;
 import com.ur.urcap.api.contribution.ProgramNodeContribution;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
+import com.ur.urcap.api.domain.io.DigitalIO;
+import com.ur.urcap.api.domain.program.nodes.builtin.configurations.waitnode.DigitalInput;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 import com.ur.urcap.api.domain.undoredo.UndoRedoManager;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputCallback;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputFactory;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardNumberInput;
+
+import static com.meulenkamp.discretemanipulator.general.DashboardClient.ProgramState.*;
 
 public class ProgramContribution
         implements ProgramNodeContribution {
@@ -25,9 +30,10 @@ public class ProgramContribution
     private final UndoRedoManager undoRedoManager;
     private final KeyboardInputFactory keyboardFactory;
     private final DataModel model;
-    private LiveControl liveControl;
 
     private final IOHandler ioHandler;
+    private volatile InstallationContribution installation;
+    private final DashboardClient dashboardClient;
 
     public ProgramContribution(
             final ProgramAPIProvider apiProvider,
@@ -44,21 +50,62 @@ public class ProgramContribution
                 .getKeyboardInputFactory();
         this.view = view;
         this.model = model;
+
+        this.installation = getInstallation();
         this.ioHandler = new IOHandler(apiProvider.getProgramAPI().getIOModel());
+        this.dashboardClient = new DashboardClient();
+
+        if (!dashboardClient.connect("127.0.0.1")) {
+            view.errorMessage("Could not connect to dashboard server");
+            throw new RuntimeException("Could not connect to dashboard server");
+        }
+
+        final Thread resetDaemon = new Thread(() -> {
+            final DigitalIO fastOutput = ioHandler.getDigitalIO(installation.getFastOutput());
+            final DigitalIO slowOutput = ioHandler.getDigitalIO(installation.getSlowOutput());
+            final DigitalIO reverseOutput = ioHandler.getDigitalIO(installation.getReverseOutput());
+
+            try {
+                DashboardClient.ProgramState previousState = UNDEFINED;
+
+                while(true) {
+                    final DashboardClient.ProgramState newState = dashboardClient.programState();
+
+                    // Stop the moving attachments when the program isn't playing anymore
+                    if (previousState == PLAYING && newState != previousState) {
+                        fastOutput.setValue(false);
+                        slowOutput.setValue(false);
+                        reverseOutput.setValue(false);
+                    }
+                    previousState = newState;
+                    Thread.sleep(1);
+                }
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                // last effort attempt at stopping the moving attachments
+                fastOutput.setValue(false);
+                slowOutput.setValue(false);
+                reverseOutput.setValue(false);
+            }
+        }, "Reset IO daemon");
+        resetDaemon.setDaemon(true);
+        resetDaemon.start();
     }
 
     @Override
     public void openView() {
-        InstallationContribution installation = getInstallation();
+        this.installation = getInstallation();
 
         view.setDirection(getDirection());
         view.setMoves(getMoves());
         view.startUpdating(
-            ioHandler.getDigitalIO(installation.getLeftSensorInput()),
-            ioHandler.getDigitalIO(installation.getRightSensorInput()),
-            ioHandler.getDigitalIO(installation.getFastOutput()),
-            ioHandler.getDigitalIO(installation.getSlowOutput()),
-            ioHandler.getDigitalIO(installation.getReverseOutput())
+                dashboardClient,
+                ioHandler.getDigitalIO(installation.getLeftSensorInput()),
+                ioHandler.getDigitalIO(installation.getRightSensorInput()),
+                ioHandler.getDigitalIO(installation.getFastOutput()),
+                ioHandler.getDigitalIO(installation.getSlowOutput()),
+                ioHandler.getDigitalIO(installation.getReverseOutput())
         );
     }
 
