@@ -31,10 +31,13 @@ public class ProgramView
     private final JCheckBox leftSensorState = new JCheckBox("", false);
     private final JCheckBox rightSensorState = new JCheckBox("", false);
 
+    private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
+
     private LiveControl liveControl;
     private Box jogButtons;
 
-    private final AtomicBoolean shouldUpdate = new AtomicBoolean(true);
+    private volatile DashboardClient.ProgramState state = UNDEFINED;
+
 
     public ProgramView(final ViewAPIProvider apiProvider, final Style style) {
         super(style);
@@ -101,10 +104,14 @@ public class ProgramView
         final JButton previous = iconButton("previous", 24);
         final JButton reverseFast = iconButton("fast-reverse", 24);
         final JButton reverseSlow = iconButton("reverse", 24);
-        final JButton stop = iconButton("stop", 24);
         final JButton forwardSlow = iconButton("forward", 24);
         final JButton forwardFast = iconButton("fast-forward", 24);
         final JButton next = iconButton("next", 24);
+
+        if (this.state == PLAYING || this.state == UNDEFINED) {
+            Arrays.asList(jogButtons.getComponents())
+                    .forEach(component -> component.setEnabled(false));
+        }
 
         previous.addChangeListener(event -> {
             if (previous.isEnabled()) {
@@ -136,12 +143,6 @@ public class ProgramView
             }
         });
         reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
-        stop.addChangeListener(event -> {
-            if (stop.isEnabled() && stop.getModel().isPressed()) {
-                liveControl.stop();
-            }
-        });
-        stop.setToolTipText("Stop movement");
         forwardSlow.addChangeListener(event -> {
             if (forwardSlow.isEnabled()) {
                 if (forwardSlow.getModel().isPressed()) {
@@ -178,7 +179,6 @@ public class ProgramView
         jogButtons.add(previous);
         jogButtons.add(reverseFast);
         jogButtons.add(reverseSlow);
-        jogButtons.add(stop);
         jogButtons.add(forwardSlow);
         jogButtons.add(forwardFast);
         jogButtons.add(next);
@@ -272,8 +272,9 @@ public class ProgramView
         final DigitalIO slowOutput,
         final DigitalIO reverseOutput
     ) {
-        if(liveControl != null) liveControl.stop();
-        System.out.println("Start Updating!!");
+        if (liveControl != null) {
+            liveControl.stop();
+        }
 
         shouldUpdate.set(true);
 
@@ -287,23 +288,22 @@ public class ProgramView
 
         new Thread(() -> {
             try {
-                DashboardClient.ProgramState previousState = UNDEFINED;
-
                 while (this.shouldUpdate.get()) {
                     final DashboardClient.ProgramState newState = dashboardClient.programState();
 
                     this.leftSensorState.setSelected(leftSensor.getValue());
                     this.rightSensorState.setSelected(rightSensor.getValue());
 
-                    if (newState != previousState) {
+                    if (newState != state) {
                         Arrays.asList(this.jogButtons.getComponents())
                                 .forEach(component -> component.setEnabled(PLAYING != newState));
+                        state = newState;
                     }
 
                     Thread.sleep(50);
                 }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }, "UI <-> IO sync").start();
     }

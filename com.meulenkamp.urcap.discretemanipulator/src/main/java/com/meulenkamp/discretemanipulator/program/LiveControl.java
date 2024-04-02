@@ -56,10 +56,12 @@ public class LiveControl {
     }
 
     public void stop() {
-        isRunning.set(false);
-        reverseOutput.setValue(false);
-        fastOutput.setValue(false);
-        slowOutput.setValue(false);
+        if(isRunning.get()) {
+            isRunning.set(false);
+            reverseOutput.setValue(false);
+            fastOutput.setValue(false);
+            slowOutput.setValue(false);
+        }
     }
 
     public void next() {

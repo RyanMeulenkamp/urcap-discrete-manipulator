@@ -7,7 +7,6 @@ import com.ur.urcap.api.contribution.ProgramNodeContribution;
 import com.ur.urcap.api.contribution.program.ProgramAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.io.DigitalIO;
-import com.ur.urcap.api.domain.program.nodes.builtin.configurations.waitnode.DigitalInput;
 import com.ur.urcap.api.domain.script.ScriptWriter;
 import com.ur.urcap.api.domain.undoredo.UndoRedoManager;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardInputCallback;

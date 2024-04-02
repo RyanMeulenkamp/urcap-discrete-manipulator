@@ -6,6 +6,7 @@ import com.ur.urcap.api.contribution.installation.InstallationAPIProvider;
 import com.ur.urcap.api.domain.data.DataModel;
 import com.ur.urcap.api.domain.io.IO;
 import com.ur.urcap.api.domain.script.ScriptWriter;
+import com.ur.urcap.api.domain.undoredo.UndoRedoManager;
 
 import java.util.stream.Stream;
 

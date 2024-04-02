@@ -29,8 +29,15 @@ public class InstallationView
 			final String key, final InstallationContribution contribution,
 			final JPanel panel
 	) {
+		chooser.setPreferredSize(
+				new Dimension(200, chooser.getPreferredSize().height)
+		);
+		chooser.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		label.setPreferredSize(
+				new Dimension(200, chooser.getPreferredSize().height)
+		);
+		label.setAlignmentX(Component.LEFT_ALIGNMENT);
 		final Box sensorBox = Box.createHorizontalBox();
-		sensorBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 		sensorBox.add(label);
 		sensorBox.add(style.createHorizontalSpacing());
 		sensorBox.add(chooser);
@@ -44,60 +51,31 @@ public class InstallationView
 		});
 	}
 
-	public static int getWidest(final  JComponent... components) {
-		int widest = 0;
-		for (final JComponent component: components) {
-			final int width = component.getPreferredSize().width;
-			System.out.println("width: " + width);
-			if (width > widest) {
-				widest = width;
-			}
-		}
-		System.out.println("widest: " + widest);
-		return widest;
-	}
-
-	public static void setWidth(
-			final int width, final JComponent ... components
-	) {
-		for (final JComponent component: components) {
-			component.setPreferredSize(
-					new Dimension(width, component.getPreferredSize().height)
-			);
-		}
-	}
-
-	public void setWidest(final JComponent... components) {
-		setWidth(getWidest(components), components);
-	}
-
 	@Override
 	public void buildUI(
 			final JPanel panel, final InstallationContribution contribution
 	) {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		final JLabel leftSensorLabel = new JLabel("Left sensor");
-		final JLabel rightSensorLabel = new JLabel("Right sensor");
-		final JLabel slowOutLabel = new JLabel("Slow output");
-		final JLabel fastOutLabel = new JLabel("Fast output");
-		final JLabel reverseOutLabel = new JLabel("Reverse output");
-
-		setWidest(
-				leftSensorLabel, rightSensorLabel, slowOutLabel, fastOutLabel,
-				reverseOutLabel
+		addChooser(
+				leftSensor, new JLabel("Left sensor"),
+				LEFT_SENSOR_INPUT_KEY, contribution, panel
 		);
 		addChooser(
-				leftSensor, leftSensorLabel, LEFT_SENSOR_INPUT_KEY, contribution, panel
+				rightSensor, new JLabel("Right sensor"),
+				RIGHT_SENSOR_INPUT_KEY, contribution, panel
 		);
 		addChooser(
-				rightSensor, rightSensorLabel, RIGHT_SENSOR_INPUT_KEY, contribution, panel
+				slowOut, new JLabel("Slow output"),
+				SLOW_OUTPUT_KEY, contribution, panel
 		);
-		addChooser(slowOut, slowOutLabel, SLOW_OUTPUT_KEY, contribution, panel);
-		addChooser(fastOut, fastOutLabel, FAST_OUTPUT_KEY, contribution, panel);
 		addChooser(
-				reverseOut, reverseOutLabel, REVERSE_OUTPUT_KEY, contribution,
-				panel
+				fastOut, new JLabel("Fast output"),
+				FAST_OUTPUT_KEY, contribution, panel
+		);
+		addChooser(
+				reverseOut, new JLabel("Reverse output"),
+				REVERSE_OUTPUT_KEY, contribution, panel
 		);
 	}
 
@@ -125,14 +103,12 @@ public class InstallationView
 	public void setInputs(final IO ... ios) {
 		setInputsFor(leftSensor, ios);
 		setInputsFor(rightSensor, ios);
-		setWidest(leftSensor, rightSensor, slowOut, fastOut, reverseOut);
 	}
 
 	public void setOutputs(final IO ... ios) {
 		setOutputsFor(slowOut, ios);
 		setOutputsFor(fastOut, ios);
 		setOutputsFor(reverseOut, ios);
-		setWidest(leftSensor, rightSensor, slowOut, fastOut, reverseOut);
 	}
 
 	public void setLeftSensorInput(final String input) {
@@ -153,25 +129,5 @@ public class InstallationView
 
 	public void setReverseOutput(final String output) {
 		reverseOut.setSelectedItem(output);
-	}
-
-	public String getLeftSensorInput() {
-		return (String) leftSensor.getSelectedItem();
-	}
-
-	public String getRightSensorInput() {
-		return (String) rightSensor.getSelectedItem();
-	}
-
-	public String getSlowOutput() {
-		return (String) slowOut.getSelectedItem();
-	}
-
-	public String getFastOutput() {
-		return (String) fastOut.getSelectedItem();
-	}
-
-	public String getReverseOutput() {
-		return (String) reverseOut.getSelectedItem();
 	}
 }
