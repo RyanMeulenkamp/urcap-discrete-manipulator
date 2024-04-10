@@ -129,34 +129,6 @@ public class ProgramView
         final JButton forwardFast = iconButton("fast-forward", 24);
         final JButton next = iconButton("next", 24);
 
-        if (this.state == PLAYING || this.state == UNDEFINED) {
-            Arrays.asList(jogButtons.getComponents())
-                    .forEach(component -> component.setEnabled(false));
-        }
-
-        previous.addChangeListener(createChangeListener(
-                previous, liveControl::previous
-        ));
-        previous.setToolTipText("Move to previous discrete position");
-        reverseFast.addChangeListener(createChangeListener(
-                reverseFast, liveControl::fastReverse
-        ));
-        reverseFast.setToolTipText("Jog counter-clockwise (fast)");
-        reverseSlow.addChangeListener(createChangeListener(
-                reverseSlow, liveControl::slowReverse
-        ));
-        reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
-        forwardSlow.addChangeListener(createChangeListener(
-                forwardSlow, liveControl::slowForward
-        ));
-        forwardSlow.setToolTipText("Jog clockwise (slow)");
-        forwardFast.addChangeListener(createChangeListener(
-                forwardFast, liveControl::fastForward
-        ));
-        forwardFast.setToolTipText("Jog clockwise (fast)");
-        next.addChangeListener(createChangeListener(next, liveControl::next));
-        next.setToolTipText("Move to next discrete position");
-
         jogButtons.add(new JLabel("Jog:"));
         jogButtons.add(style.createHorizontalSpacing());
         jogButtons.add(previous);
@@ -165,6 +137,36 @@ public class ProgramView
         jogButtons.add(forwardSlow);
         jogButtons.add(forwardFast);
         jogButtons.add(next);
+
+        if (this.state == PLAYING || this.state == UNDEFINED) {
+            Arrays.asList(jogButtons.getComponents())
+                    .forEach(component -> component.setEnabled(false));
+        }
+
+        previous.addChangeListener(createChangeListener(
+                previous, () -> liveControl.previous()
+        ));
+        previous.setToolTipText("Move to previous discrete position");
+        reverseFast.addChangeListener(createChangeListener(
+                reverseFast, () -> liveControl.fastReverse()
+        ));
+        reverseFast.setToolTipText("Jog counter-clockwise (fast)");
+        reverseSlow.addChangeListener(createChangeListener(
+                reverseSlow, () -> liveControl.slowReverse()
+        ));
+        reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
+        forwardSlow.addChangeListener(createChangeListener(
+                forwardSlow, () -> liveControl.slowForward()
+        ));
+        forwardSlow.setToolTipText("Jog clockwise (slow)");
+        forwardFast.addChangeListener(createChangeListener(
+                forwardFast, () -> liveControl.fastForward()
+        ));
+        forwardFast.setToolTipText("Jog clockwise (fast)");
+        next.addChangeListener(createChangeListener(
+                next, () -> liveControl.next())
+        );
+        next.setToolTipText("Move to next discrete position");
 
         return jogButtons;
     }
