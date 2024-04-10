@@ -10,12 +10,14 @@ import com.ur.urcap.api.domain.io.DigitalIO;
 import com.ur.urcap.api.domain.userinteraction.keyboard.KeyboardNumberInput;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.meulenkamp.discretemanipulator.general.DashboardClient.ProgramState.*;
 
@@ -98,6 +100,25 @@ public class ProgramView
         return sensorStateBox;
     }
 
+    private ChangeListener createChangeListener(
+            final JButton button, final Runnable action
+    ) {
+        return event -> {
+            if (button.isEnabled()) {
+                final Stream<Component> others = Stream
+                        .of(jogButtons.getComponents())
+                        .filter(other -> !Objects.equals(other, button));
+                if (button.getModel().isPressed()) {
+                    action.run();
+                    others.forEach(component -> component.setEnabled(false));
+                } else {
+                    liveControl.stop();
+                    others.forEach(component -> component.setEnabled(true));
+                }
+            }
+        };
+    }
+
     private Box createJogButtons() {
         jogButtons = Box.createHorizontalBox();
 
@@ -113,65 +134,27 @@ public class ProgramView
                     .forEach(component -> component.setEnabled(false));
         }
 
-        previous.addChangeListener(event -> {
-            if (previous.isEnabled()) {
-                if (previous.getModel().isPressed()) {
-                    liveControl.previous();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        previous.addChangeListener(createChangeListener(
+                previous, liveControl::previous
+        ));
         previous.setToolTipText("Move to previous discrete position");
-        reverseFast.addChangeListener(event -> {
-            if (reverseFast.isEnabled()) {
-                if (reverseFast.getModel().isPressed()) {
-                    liveControl.fastReverse();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        reverseFast.addChangeListener(createChangeListener(
+                reverseFast, liveControl::fastReverse
+        ));
         reverseFast.setToolTipText("Jog counter-clockwise (fast)");
-        reverseSlow.addChangeListener(event -> {
-            if (reverseSlow.isEnabled()) {
-                if (reverseSlow.getModel().isPressed()) {
-                    liveControl.slowReverse();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        reverseSlow.addChangeListener(createChangeListener(
+                reverseSlow, liveControl::slowReverse
+        ));
         reverseSlow.setToolTipText("Jog counter-clockwise (slow)");
-        forwardSlow.addChangeListener(event -> {
-            if (forwardSlow.isEnabled()) {
-                if (forwardSlow.getModel().isPressed()) {
-                    liveControl.slowForward();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        forwardSlow.addChangeListener(createChangeListener(
+                forwardSlow, liveControl::slowForward
+        ));
         forwardSlow.setToolTipText("Jog clockwise (slow)");
-        forwardFast.addChangeListener(event -> {
-            if (forwardFast.isEnabled()) {
-                if (forwardFast.getModel().isPressed()) {
-                    liveControl.fastForward();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        forwardFast.addChangeListener(createChangeListener(
+                forwardFast, liveControl::fastForward
+        ));
         forwardFast.setToolTipText("Jog clockwise (fast)");
-        next.addChangeListener(event -> {
-            if (next.isEnabled()) {
-                if (next.getModel().isPressed()) {
-                    liveControl.next();
-                } else {
-                    liveControl.stop();
-                }
-            }
-        });
+        next.addChangeListener(createChangeListener(next, liveControl::next));
         next.setToolTipText("Move to next discrete position");
 
         jogButtons.add(new JLabel("Jog:"));
