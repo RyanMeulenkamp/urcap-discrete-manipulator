@@ -32,27 +32,39 @@ public class LiveControl {
     }
 
     public void fastForward() {
-        reverseOutput.setValue(false);
-        fastOutput.setValue(true);
-        slowOutput.setValue(false);
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            reverseOutput.setValue(false);
+            fastOutput.setValue(true);
+            slowOutput.setValue(false);
+        }
     }
 
     public void fastReverse() {
-        reverseOutput.setValue(true);
-        fastOutput.setValue(true);
-        slowOutput.setValue(false);
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            reverseOutput.setValue(true);
+            fastOutput.setValue(true);
+            slowOutput.setValue(false);
+        }
     }
 
     public void slowForward() {
-        reverseOutput.setValue(false);
-        fastOutput.setValue(false);
-        slowOutput.setValue(true);
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            reverseOutput.setValue(false);
+            fastOutput.setValue(false);
+            slowOutput.setValue(true);
+        }
     }
 
     public void slowReverse() {
-        reverseOutput.setValue(true);
-        fastOutput.setValue(false);
-        slowOutput.setValue(true);
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            reverseOutput.setValue(true);
+            fastOutput.setValue(false);
+            slowOutput.setValue(true);
+        }
     }
 
     public void stop() {
@@ -65,34 +77,38 @@ public class LiveControl {
     }
 
     public void next() {
-        isRunning.set(true);
-        new Thread(() -> {
-            try {
-                fastForward();
-                awaitSensorState(leftSensorInput, false);
-                awaitSensorState(leftSensorInput, true);
-                slowForward();
-                awaitSensorState(rightSensorInput, false);
-                awaitSensorState(rightSensorInput, true);
-            } finally {
-                stop();
-            }
-        }).start();
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            new Thread(() -> {
+                try {
+                    fastForward();
+                    awaitSensorState(leftSensorInput, false);
+                    awaitSensorState(leftSensorInput, true);
+                    slowForward();
+                    awaitSensorState(rightSensorInput, false);
+                    awaitSensorState(rightSensorInput, true);
+                } finally {
+                    stop();
+                }
+            }).start();
+        }
     }
 
     public void previous() {
-        isRunning.set(true);
-        new Thread(() -> {
-            try {
-                fastReverse();
-                awaitSensorState(rightSensorInput, false);
-                awaitSensorState(rightSensorInput, true);
-                slowReverse();
-                awaitSensorState(leftSensorInput, false);
-                awaitSensorState(leftSensorInput, true);
-            } finally {
-                stop();
-            }
-        }).start();
+        if (!isRunning.get()) {
+            isRunning.set(true);
+            new Thread(() -> {
+                try {
+                    fastReverse();
+                    awaitSensorState(rightSensorInput, false);
+                    awaitSensorState(rightSensorInput, true);
+                    slowReverse();
+                    awaitSensorState(leftSensorInput, false);
+                    awaitSensorState(leftSensorInput, true);
+                } finally {
+                    stop();
+                }
+            }).start();
+        }
     }
 }
