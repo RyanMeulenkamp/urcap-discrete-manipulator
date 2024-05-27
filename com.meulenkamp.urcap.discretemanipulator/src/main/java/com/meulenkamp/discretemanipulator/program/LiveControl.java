@@ -31,48 +31,64 @@ public class LiveControl {
         while (sensor.getValue() != state && isRunning.get());
     }
 
+    private void innerFastForward() {
+        isRunning.set(true);
+        reverseOutput.setValue(false);
+        fastOutput.setValue(true);
+        slowOutput.setValue(false);
+    }
+
     public void fastForward() {
         if (!isRunning.get()) {
-            isRunning.set(true);
-            reverseOutput.setValue(false);
-            fastOutput.setValue(true);
-            slowOutput.setValue(false);
+            innerFastForward();
         }
+    }
+
+    private void innerFastReverse() {
+        isRunning.set(true);
+        reverseOutput.setValue(true);
+        fastOutput.setValue(true);
+        slowOutput.setValue(false);
     }
 
     public void fastReverse() {
         if (!isRunning.get()) {
-            isRunning.set(true);
-            reverseOutput.setValue(true);
-            fastOutput.setValue(true);
-            slowOutput.setValue(false);
+            innerFastReverse();
         }
+    }
+
+    private void innerSlowForward() {
+        isRunning.set(true);
+        reverseOutput.setValue(false);
+        fastOutput.setValue(false);
+        slowOutput.setValue(true);
     }
 
     public void slowForward() {
         if (!isRunning.get()) {
-            isRunning.set(true);
-            reverseOutput.setValue(false);
-            fastOutput.setValue(false);
-            slowOutput.setValue(true);
+            innerSlowForward();
         }
+    }
+
+    private void innerSlowReverse() {
+        isRunning.set(true);
+        reverseOutput.setValue(true);
+        fastOutput.setValue(false);
+        slowOutput.setValue(true);
     }
 
     public void slowReverse() {
         if (!isRunning.get()) {
-            isRunning.set(true);
-            reverseOutput.setValue(true);
-            fastOutput.setValue(false);
-            slowOutput.setValue(true);
+            innerSlowReverse();
         }
     }
 
     public void stop() {
         if(isRunning.get()) {
-            isRunning.set(false);
             reverseOutput.setValue(false);
             fastOutput.setValue(false);
             slowOutput.setValue(false);
+            isRunning.set(false);
         }
     }
 
@@ -81,10 +97,10 @@ public class LiveControl {
             isRunning.set(true);
             new Thread(() -> {
                 try {
-                    fastForward();
+                    innerFastForward();
                     awaitSensorState(leftSensorInput, false);
                     awaitSensorState(leftSensorInput, true);
-                    slowForward();
+                    innerSlowForward();
                     awaitSensorState(rightSensorInput, false);
                     awaitSensorState(rightSensorInput, true);
                 } finally {
@@ -99,10 +115,10 @@ public class LiveControl {
             isRunning.set(true);
             new Thread(() -> {
                 try {
-                    fastReverse();
+                    innerFastReverse();
                     awaitSensorState(rightSensorInput, false);
                     awaitSensorState(rightSensorInput, true);
-                    slowReverse();
+                    innerSlowReverse();
                     awaitSensorState(leftSensorInput, false);
                     awaitSensorState(leftSensorInput, true);
                 } finally {

@@ -109,8 +109,8 @@ public class ProgramView
                         .of(jogButtons.getComponents())
                         .filter(other -> !Objects.equals(other, button));
                 if (button.getModel().isPressed()) {
-                    action.run();
                     others.forEach(component -> component.setEnabled(false));
+                    action.run();
                 } else {
                     liveControl.stop();
                     others.forEach(component -> component.setEnabled(true));
@@ -138,10 +138,8 @@ public class ProgramView
         jogButtons.add(forwardFast);
         jogButtons.add(next);
 
-        if (this.state == PLAYING || this.state == UNDEFINED) {
-            Arrays.asList(jogButtons.getComponents())
-                    .forEach(component -> component.setEnabled(false));
-        }
+        Arrays.asList(jogButtons.getComponents())
+                .forEach(component -> component.setEnabled(this.state == PLAYING || this.state == UNDEFINED));
 
         previous.addChangeListener(createChangeListener(
                 previous, () -> liveControl.previous()
